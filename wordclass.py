@@ -28,18 +28,25 @@ class Word:
             return
 
         # Word
-        self.word = search_word
+        word = article.find('span', class_='match')
+        if word:
+            super_class = word.find('span', class_='super')
+            if super_class:
+                super_class.decompose()
+            self.word = word.text
+        else:
+            return
 
         #Part of Speech
-        header_class = article.find('span', class_='tekstmedium allow-glossing').text
-        header_class = header_class.split(', ')
-        self.partofspeech = header_class[0]
+        word_info = article.find('span', class_='tekstmedium allow-glossing').text
+        word_info = word_info.split(', ')
+        self.partofspeech = word_info[0]
 
         # Gender
         if self.partofspeech == 'substantiv':
-            if header_class[1] == 'intetkøn':
+            if word_info[1] == 'intetkøn':
                 self.gender = 'et'
-            elif header_class[1] == 'fælleskøn':
+            elif word_info[1] == 'fælleskøn':
                 self.gender = 'en'
         elif self.partofspeech == 'verbum':
             self.gender = 'at'
