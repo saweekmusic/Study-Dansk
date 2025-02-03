@@ -20,6 +20,7 @@ def translate(text: str):
         "Authorization": auth
     }
 
-    response = requests.post(url, json=payload, headers=headers).text
-    data = json.loads(response)
-    return data["result"]
+    # # response = requests.post(url, json=payload, headers=headers).text
+    # data = json.loads(response)
+    # return data["result"]
+    return text

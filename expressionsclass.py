@@ -1,3 +1,5 @@
-class Expressions:
-    expression = None
-    meaning = None
+from exampleclass import Meaning
+
+class Expression:
+    expression: str = None
+    meanings:list[Meaning] = []
