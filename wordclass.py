@@ -7,10 +7,26 @@ import requests
 from bs4 import BeautifulSoup
 from translatefunc import * 
 
+# Mapping English POS to full Danish names
+EN_TO_DK = {
+    "noun": "substantiv",
+    "verb": "verbum",
+    "adjective": "adjektiv",
+    "adverb": "adverbium"
+}
+
+# Mapping full Danish POS to sidebar abbreviations
+DK_TO_ABBR = {
+    "substantiv": "sb.",
+    "verbum": "vb.",
+    "adjektiv": "adj.",
+    "adverbium": "adv."
+}
+
 class Word:
     # MARK: Attributes
     word: str = None
-    partofspeech: str = None
+    pos: str = None
     gender: str = None
     bending: list[str] = []
     pronunciation: str = None
@@ -21,19 +37,59 @@ class Word:
 
 
     # MARK: Init definition
-    def __init__(self, search_word):
+    def __init__(self, search_word: str = None, pos: str = None, url: str = None):
 
-        # Pulling the html code of the requiered word
-        source = requests.get(f'https://ordnet.dk/ddo/ordbog?query={search_word}').text
-        soup = BeautifulSoup(source, 'html.parser')
-        article = soup.find('div', class_='artikel')
+        # If url is not empty
+        if url:
 
-        # If the word doesn't exist
-        if not article.find('span', class_='match').text:
-            return
+            # Use it as a sourse
+            source = requests.get(url).text
+
+            # Pulling the html code of the requiered word
+            soup = BeautifulSoup(source, 'html.parser')
+            article = soup.find('div', class_='artikel')
+        
+        # Else
+        else:
+            source = requests.get(f'https://ordnet.dk/ddo/ordbog?query={search_word}').text
+
+            # Pulling the html code of the requiered word
+            soup = BeautifulSoup(source, 'html.parser')
+            article = soup.find('div', class_='artikel')
+
+            # If the word doesn't exist
+            if not article:
+                return None
+
+            if pos:
+                if EN_TO_DK[pos] not in article.find('span', class_='tekstmedium allow-glossing').text:
+                    divs = soup.find('div', class_='searchResultBox').find_all('div')
+
+                    for div in divs:
+                        if DK_TO_ABBR[EN_TO_DK[pos]] in div.text:
+                            return self.__init__(url=div.find('a')['href'])
+
+        # Assigning Word
+        self.word = self.word_procc(article)
+
+        # Assigning POS
+        self.pos = self.pos_procc(article, 0)
+
+        # Assigning Gender
+        self.gender = self.gender_procc(article)
+
+        # Assigning Bending
+        self.bending_procc(article)
+
+        # Assigning Pronunciation
+        self.pronunciation = self.pronun_procc(article)
+
+        # Assigning Meanings
+        self.meaning_procc(article)
 
 
-        # MARK: Assigning Word
+    # MARK: Word def
+    def word_procc(self, article):
         # Find word in the source html
         word = article.find('span', class_='match')
 
@@ -43,41 +99,41 @@ class Word:
             # Remove it from the scope
             word.find('span', class_='super').decompose()
 
-        # Assign
-        self.word = word.text
+        return word.text
 
+    
+    # MARK: POS def
+    def pos_procc(self, article, index):
 
-        # MARK: Part of Speech
+        if index > 1:
+            return None
+            
         word_info = article.find('span', class_='tekstmedium allow-glossing').text
         word_info = word_info.split(', ')
 
-        self.partofspeech = word_info[0]
+        return word_info[index]
 
 
-        # MARK: Assigning Gender
+    # MARK: Gender def
+    def gender_procc(self, article):
         # If it is a noun
-        if self.partofspeech == 'substantiv':
-
+        if self.pos == 'substantiv':
             # And if it is the et-word
-            if word_info[1] == 'intetkøn':
-
-                # Assign
-                self.gender = 'et'
-            
+            if self.pos_procc(article, 1) == 'intetkøn':
+                # Assign et
+                return 'et'
             # Else if it is the en-word
-            elif word_info[1] == 'fælleskøn':
-
-                # Assign
-                self.gender = 'en'
-
+            else:
+                # Assign en
+                return 'en'
         # Else if it is a verb
-        elif self.partofspeech == 'verbum':
+        elif self.pos == 'verbum':
+            # Assign at
+            return 'at'
+    
 
-            # Assign
-            self.gender = 'at'
-
-
-        # MARK: Assigning Bending
+    # MARK: Bending def
+    def bending_procc(self, article):
         # Get benfing section from the site
         bending_section = article.find('div', id='id-boj')
 
@@ -102,13 +158,21 @@ class Word:
                 # Append the result
                 self.bending.append(bending_section[i])
 
+    
+    # MARK: Pronunciation def
+    def pronun_procc(self, article):
 
-        # MARK: Assigning Pronunciation
+        # Find
         pronunciation_section = article.find('div', id='id-udt')
-        self.pronunciation = pronunciation_section.find('span', class_='lydskrift').text
 
+        # Return
+        return pronunciation_section.find('span', class_='lydskrift').text
 
-        ## MARK: Assigning Meanings
+    
+    # MARK: Meaning def
+    def meaning_procc(self, article):
+
+        # Find section with all the definitions and examples
         meaning_section = article.find_all('div', class_='definitionIndent')
 
         for i in range(len(meaning_section)):
@@ -137,21 +201,9 @@ class Word:
                 # Break out of the loop
                 break
 
-
-        # # Expressions
-        # expressions_section = article.find('div', id='content-faste-udtryk')
-        # expressions_section = expressions_section.find_all('span', class_='definition')
-
-        # for i in range(len(expressions_section)):
-        #     expression = Expression()
-        #     expression = expressions_section[i].text
-        #     meaning.definition = translate(meaning.definition)
-        #     self.meanings.append(meaning)
-    
-
-test = Word('børste')
+test = Word(search_word='lys', pos='verb')
 print('Word: ' + test.word)
-print('Part of Speech: ' + test.partofspeech)
+print('Part of Speech: ' + test.pos)
 print('Gender: ' + test.gender)
 print('Bending: ', end = '')
 print(test.bending)
