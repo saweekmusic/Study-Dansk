@@ -1,3 +1,4 @@
+# MARK: Imports
 # Local Classes
 from exampleclass import Meaning
 from expressionsclass import Expression
@@ -6,7 +7,10 @@ from expressionsclass import Expression
 import requests
 from bs4 import BeautifulSoup
 from translatefunc import * 
+from fake_useragent import UserAgent
 
+
+# MARK: Global Variables
 # Mapping English POS to full Danish names
 EN_TO_DK = {
     "noun": "substantiv",
@@ -23,6 +27,10 @@ DK_TO_ABBR = {
     "adverbium": "adv."
 }
 
+ua = UserAgent()
+
+
+# MARK: Class Word
 class Word:
     # MARK: Attributes
     word: str = None
@@ -39,11 +47,13 @@ class Word:
     # MARK: Init definition
     def __init__(self, search_word: str = None, pos: str = None, url: str = None):
 
+        header = {'User-Agent': ua.random}
+
         # If url is not empty
         if url:
 
             # Use it as a sourse
-            source = requests.get(url).text
+            source = requests.get(url, headers=header).text
 
             # Pulling the html code of the requiered word
             soup = BeautifulSoup(source, 'html.parser')
@@ -51,7 +61,7 @@ class Word:
         
         # Else
         else:
-            source = requests.get(f'https://ordnet.dk/ddo/ordbog?query={search_word}').text
+            source = requests.get(f'https://ordnet.dk/ddo/ordbog?query={search_word}', headers=header).text
 
             # Pulling the html code of the requiered word
             soup = BeautifulSoup(source, 'html.parser')
@@ -201,7 +211,7 @@ class Word:
                 # Break out of the loop
                 break
 
-test = Word(search_word='lys', pos='verb')
+test = Word(search_word='hånd')
 print('Word: ' + test.word)
 print('Part of Speech: ' + test.pos)
 print('Gender: ' + test.gender)
