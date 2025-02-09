@@ -1,5 +1,6 @@
 import requests
 import json
+import os
 
 with open('authorisation.txt') as file:
     auth = file.readline()
@@ -17,7 +18,7 @@ def translate(text: str):
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "Authorization": auth
+        "Authorization": os.getenv("TRANSALTE_AUTH")
     }
 
     # # response = requests.post(url, json=payload, headers=headers).text
