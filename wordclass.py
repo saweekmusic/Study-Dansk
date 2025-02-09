@@ -27,7 +27,7 @@ DK_TO_ABBR = {
     "adverbium": "adv."
 }
 
-ua = UserAgent()
+UA = UserAgent()
 
 
 # MARK: Class Word
@@ -47,38 +47,20 @@ class Word:
     # MARK: Init definition
     def __init__(self, search_word: str = None, pos: str = None, url: str = None):
 
-        header = {'User-Agent': ua.random}
+        # TODO: Database check
 
-        # If url is not empty
-        if url:
-
-            # Use it as a sourse
-            source = requests.get(url, headers=header).text
-
-            # Pulling the html code of the requiered word
-            soup = BeautifulSoup(source, 'html.parser')
-            article = soup.find('div', class_='artikel')
+        # API request of the word from the Database
         
-        # Else
-        else:
-            source = requests.get(f'https://ordnet.dk/ddo/ordbog?query={search_word}', headers=header).text
+        # If word exist in the API response
 
-            # Pulling the html code of the requiered word
-            soup = BeautifulSoup(source, 'html.parser')
-            article = soup.find('div', class_='artikel')
+            # Assign values from API to the variables in self
 
-            # If the word doesn't exist
-            if not article:
-                return None
+            # Return
 
-            if pos:
-                if EN_TO_DK[pos] not in article.find('span', class_='tekstmedium allow-glossing').text:
-                    divs = soup.find('div', class_='searchResultBox').find_all('div')
 
-                    for div in divs:
-                        if DK_TO_ABBR[EN_TO_DK[pos]] in div.text:
-                            return self.__init__(url=div.find('a')['href'])
-
+        # Scrape the word
+        article = self.findURL(search_word=search_word, pos=pos)
+        
         # Assigning Word
         self.word = self.word_procc(article)
 
@@ -211,6 +193,49 @@ class Word:
                 # Break out of the loop
                 break
 
+
+    # MARK: Find URL def
+    def findURL(self, search_word: str = None, pos: str = None, url: str = None):
+        header = {'User-Agent': UA.random}
+
+        # If url is not empty
+        if url:
+
+            # Use it as a sourse
+            source = requests.get(url, headers=header).text
+
+            # Returning the html code of the requiered word
+            soup = BeautifulSoup(source, 'html.parser')
+            return soup.find('div', class_='artikel')
+        
+        # Else
+        else:
+            # Search for the word
+            source = requests.get(f'https://ordnet.dk/ddo/ordbog?query={search_word}', headers=header).text
+
+            # Pulling the html code of the requiered word
+            soup = BeautifulSoup(source, 'html.parser')
+            article = soup.find('div', class_='artikel')
+
+            # If the word doesn't exist
+            if not article:
+                return None
+
+            # Check If there is a requested pos
+            if pos:
+
+                # If the current word does not match the requested pos
+                if EN_TO_DK[pos] not in article.find('span', class_='tekstmedium allow-glossing').text:
+                    divs = soup.find('div', class_='searchResultBox').find_all('div')
+
+                    # Find the required pos of the word in the searchResultBox
+                    for div in divs:
+                        if DK_TO_ABBR[EN_TO_DK[pos]] in div.text:
+                            return self.findURL(url=div.find('a')['href'])
+                        
+            return article
+        
+        
 test = Word(search_word='hånd')
 print('Word: ' + test.word)
 print('Part of Speech: ' + test.pos)
