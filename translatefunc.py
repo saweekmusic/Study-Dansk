@@ -2,10 +2,6 @@ import requests
 import json
 import os
 
-with open('authorisation.txt') as file:
-    auth = file.readline()
-    
-
 def translate(text: str):
     url = "https://api-b2b.backenster.com/b1/api/v3/translate"
 

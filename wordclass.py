@@ -1,51 +1,25 @@
 # MARK: Imports
-# Local Classes
-from exampleclass import Meaning
-from expressionsclass import Expression
-
-# Import libreries
-import requests
-from bs4 import BeautifulSoup
+from meanings import Meaning
+from idioms import Idiom
+from consts import *
 from translatefunc import * 
-from fake_useragent import UserAgent
-
-
-# MARK: Global Variables
-# Mapping English POS to full Danish names
-EN_TO_DK = {
-    "noun": "substantiv",
-    "verb": "verbum",
-    "adjective": "adjektiv",
-    "adverb": "adverbium"
-}
-
-# Mapping full Danish POS to sidebar abbreviations
-DK_TO_ABBR = {
-    "substantiv": "sb.",
-    "verbum": "vb.",
-    "adjektiv": "adj.",
-    "adverbium": "adv."
-}
-
-UA = UserAgent()
+from scraper import *
 
 
 # MARK: Class Word
 class Word:
-    # MARK: Attributes
+    # Attributes
     word: str = None
-    pos: str = None
-    gender: str = None
-    bending: list[str] = []
     pronunciation: str = None
-    meanings: list[Meaning] = []
-
-    # TODO: Implement Expressions
-    # expressions: list[Expression] = []
+    determiners: str = None
+    gender: str = None
+    bending: list[str] = None
+    meanings: list[Meaning] = None
+    idioms: list[Idiom] = None
 
 
     # MARK: Init definition
-    def __init__(self, search_word: str = None, pos: str = None, url: str = None):
+    def __init__(self, search_word: str = None, determiners: str = None, url: str = None):
 
         # TODO: Database check
 
@@ -59,189 +33,195 @@ class Word:
 
 
         # Scrape the word
-        article = self.findURL(search_word=search_word, pos=pos)
-        
-        # Assigning Word
-        self.word = self.word_procc(article)
-
-        # Assigning POS
-        self.pos = self.pos_procc(article, 0)
-
-        # Assigning Gender
-        self.gender = self.gender_procc(article)
-
-        # Assigning Bending
-        self.bending_procc(article)
-
-        # Assigning Pronunciation
-        self.pronunciation = self.pronun_procc(article)
-
-        # Assigning Meanings
-        self.meaning_procc(article)
-
-
-    # MARK: Word def
-    def word_procc(self, article):
-        # Find word in the source html
-        word = article.find('span', class_='match')
-
-        # If the 'word' has a number after it
-        if word.find('span', class_='super'):
-
-            # Remove it from the scope
-            word.find('span', class_='super').decompose()
-
-        return word.text
-
-    
-    # MARK: POS def
-    def pos_procc(self, article, index):
-
-        if index > 1:
+        try:
+            article = findURL(search_word=search_word, determiners=determiners)
+        except ValueError as e:
+            print(e)
             return None
-            
-        word_info = article.find('span', class_='tekstmedium allow-glossing').text
-        word_info = word_info.split(', ')
-
-        return word_info[index]
-
-
-    # MARK: Gender def
-    def gender_procc(self, article):
-        # If it is a noun
-        if self.pos == 'substantiv':
-            # And if it is the et-word
-            if self.pos_procc(article, 1) == 'intetkøn':
-                # Assign et
-                return 'et'
-            # Else if it is the en-word
-            else:
-                # Assign en
-                return 'en'
-        # Else if it is a verb
-        elif self.pos == 'verbum':
-            # Assign at
-            return 'at'
-    
-
-    # MARK: Bending def
-    def bending_procc(self, article):
-        # Get benfing section from the site
-        bending_section = article.find('div', id='id-boj')
-
-        # Find the bending themselves from the section and break them into an array
-        bending_section = bending_section.find('span', class_='tekstmedium allow-glossing').text.strip().split(', ')
-
-        # For every bending in the array
-        for i in range(len(bending_section)):
-
-            # If the bending has — sign with an ending
-            if '-' in bending_section[i]:
-
-                # Remove the - sign and combine the ending with the word
-                bending_section[i] = bending_section[i].replace('-', '')
-
-                # Append the result
-                self.bending.append(self.word + bending_section[i])
-            
-            # Else if the bendign is a whole word
-            else:
-
-                # Append the result
-                self.bending.append(bending_section[i])
-
-    
-    # MARK: Pronunciation def
-    def pronun_procc(self, article):
-
-        # Find
-        pronunciation_section = article.find('div', id='id-udt')
-
-        # Return
-        return pronunciation_section.find('span', class_='lydskrift').text
-
-    
-    # MARK: Meaning def
-    def meaning_procc(self, article):
-
-        # Find section with all the definitions and examples
-        meaning_section = article.find_all('div', class_='definitionIndent')
-
-        for i in range(len(meaning_section)):
-
-            # If in the meaning section contains an element with id='betydning-{i}'
-            if meaning_section[i].find('div', id=f'betydning-{i+1}'):
-
-                # Go to the element
-                path = meaning_section[i].find('div', id=f'betydning-{i+1}')
-
-                # Save definition
-                definition = path.find('span', class_='definition').text.replace('\xa0', '-')
-                
-                # If there is an exiting example
-                if path.parent.find('span', class_='citat'):
-
-                    # Save the example
-                    example = path.parent.find('span', class_='citat').text
-                else:
-                    example = None
-
-                # Append a Meaning object with definition and example
-                self.meanings.append(Meaning(translate(definition), example))
-            else:
-
-                # Break out of the loop
-                break
-
-
-    # MARK: Find URL def
-    def findURL(self, search_word: str = None, pos: str = None, url: str = None):
-        header = {'User-Agent': UA.random}
-
-        # If url is not empty
-        if url:
-
-            # Use it as a sourse
-            source = requests.get(url, headers=header).text
-
-            # Returning the html code of the requiered word
-            soup = BeautifulSoup(source, 'html.parser')
-            return soup.find('div', class_='artikel')
         
-        # Else
+
+        self.word = getWord(article)
+        self.determiners = getDeterminers(article, 0)
+        self.gender = getGender(article, self.determiners)
+        self.bending = getBendings(article, self.word)
+        self.pronunciation = getPronunciation(article)
+        getMeaning(self, article)
+        getIdioms(self, article)
+
+        # TODO: Add the word to the database
+
+
+    # MARK: Add meaning
+    def add_meaning(self, meaning: Meaning):
+        self.meanings.append(meaning)
+
+    
+    # MARK: Add idiom
+    def add_idiom(self, idiom: Idiom):
+        self.idioms.append(idiom)
+
+
+
+# MARK: Word def
+def getWord(article: str) -> str:
+    # Find word in the source html
+    word = article.find('span', class_='match')
+
+    # If the 'word' has a number after it
+    super_element = word.find('span', class_='super')
+    if super_element:
+
+        # Remove it from the scope
+        super_element.decompose()
+
+    return word.text
+
+
+# MARK: Determiners def
+def getDeterminers(article: str, index: int) -> str:
+    if index > 1:
+        return None
+        
+    word_info = article.find('span', class_='tekstmedium allow-glossing').text.split(', ')
+    return word_info[index]
+
+
+# MARK: Gender def
+def getGender(article: str, determiners: str) -> str:
+    # If it is a noun
+    if determiners == 'substantiv':
+        return 'et' if getDeterminers(article, 1) == 'intetkøn' else 'en'
+    
+    # Else if it is a verb
+    elif determiners == 'verbum':
+        return 'at'
+    
+    return None
+
+
+# MARK: Bending def
+def getBendings(article: str, word: str) -> list[str]:
+    # Get benfing section from the site
+    bending_sec = article.find('div', id='id-boj')
+
+    # Find the bending themselves from the section and break them into an array
+    bending_sec = bending_sec.find('span', class_='tekstmedium allow-glossing').text.split(', ')
+
+    bendings = []
+    # For every bending in the array
+    for bending in bending_sec:
+
+        # If the bending has — sign with an ending
+        if '-' in bending:
+
+            # Remove the - sign and combine the ending with the word
+            bending = bending.replace('-', '')
+
+            # Append the result
+            bendings.append(word + bending)
+        
+        # Else if the bendign is a whole word
         else:
-            # Search for the word
-            source = requests.get(f'https://ordnet.dk/ddo/ordbog?query={search_word}', headers=header).text
 
-            # Pulling the html code of the requiered word
-            soup = BeautifulSoup(source, 'html.parser')
-            article = soup.find('div', class_='artikel')
+            # Append the result
+            bendings.append(bending)
 
-            # If the word doesn't exist
-            if not article:
-                return None
+    return bendings
 
-            # Check If there is a requested pos
-            if pos:
 
-                # If the current word does not match the requested pos
-                if EN_TO_DK[pos] not in article.find('span', class_='tekstmedium allow-glossing').text:
-                    divs = soup.find('div', class_='searchResultBox').find_all('div')
+# MARK: Pronunciation def
+def getPronunciation(article: str) -> str:
 
-                    # Find the required pos of the word in the searchResultBox
-                    for div in divs:
-                        if DK_TO_ABBR[EN_TO_DK[pos]] in div.text:
-                            return self.findURL(url=div.find('a')['href'])
-                        
-            return article
+    # Find
+    pronunciation = article.find('span', class_='lydskrift').text
+
+    # Return
+    return pronunciation.replace('\xa0', '')
+
+
+# MARK: Meaning def
+def getMeaning(self, article):
+
+    # Find section with all the definitions and examples
+    meanings = article.find('div', id='content-betydninger')
+
+    for meaning in extract_meanings(meanings, 'betydning'):
+        self.add_meaning(meaning)
+
+    
+# MARK: Idioms def
+def getIdioms(self, article: str):
+
+    # Find section with the idioms
+    expressionsHTML = article.find('div', id='content-faste-udtryk')
+
+    # For every id="udtryk-{i}" in the section
+    for i in range(len(expressionsHTML.find_all('div', id=lambda x: x and x.startswith('udtryk-')))):
+
+        path = expressionsHTML.find('div', id=f'udtryk-{i+1}')
+        if not path:
+            break
+
+        print('doing idiom #', i+1)
+        # Create Idiom object with the idiom and its translation
+        idiom = path.find('span', class_='match').text
+        idiom_en = translate(idiom)
+        idiom_obj = Idiom(idiom, idiom_en)
+
+        for meaning in extract_meanings(expressionsHTML, f'udtryk-{i+1}-betydning'):
+            idiom_obj.add_meaning(meaning)
+            print(f'added meaning to idiom: {meaning}')
+
+        self.add_idiom(idiom_obj)
+
+
+# MARK: Extract meanings def
+def extract_meanings(base_path, id_prefix: str) -> list[Meaning]:
+    meanings = []
+    for i in range(len(base_path.find_all('div', id=lambda x: x and x.startswith(id_prefix)))):
+        
+        path = base_path.find('div', id=f'{id_prefix}-{i+1}')
+        if not path:
+            break
+
+        # Save definition
+        definition = path.find('span', class_='definition').text.replace('\xa0', '-')
+        definition_en = translate(definition)
+
+        # Save the example if it exists
+        example_tag = path.parent.find('span', class_='citat')
+        example = example_tag.text if example_tag else None
+        example_en = translate(example) if example else None
+
+        # Append a Meaning object with definition and example
+        meanings.append(Meaning(definition, definition_en, example, example_en))
+    return meanings
         
         
-test = Word(search_word='hånd')
+test = Word(search_word='lyse', determiners='verb')
 print('Word: ' + test.word)
-print('Part of Speech: ' + test.pos)
+print('Pronunciation: ' + test.pronunciation)
+print('Part of Speech: ' + test.determiners)
 print('Gender: ' + test.gender)
 print('Bending: ', end = '')
 print(test.bending)
-print('Pronunciation: ' + test.pronunciation)
-print('Definition 1: ' + test.meanings[0].definition)
-print('Example: ' + test.meanings[0].example)
+
+
+print('Meanings:')
+for meaning in test.meanings:
+    print('    Definition: ' + meaning.definition)
+    print('    Definition (EN): ' + meaning.definition_en)
+    print('    Example: ' + meaning.example if meaning.example else 'None')
+    print('    Example (EN): ' + meaning.example_en if meaning.example_en else 'None')
+    print()
+
+print('Idioms:')
+for idiom in test.idioms:
+    print('    Idiom: ' + idiom.idiom)
+    print('    Idiom (EN): ' + idiom.idiom_en)
+    for meaning in idiom.meanings:
+        print('        Definition: ' + meaning.definition)
+        print('        Definition (EN): ' + meaning.definition_en)
+        print('        Example: ' + meaning.example if meaning.example else 'None')
+        print('        Example (EN): ' + meaning.example_en if meaning.example_en else 'None')
+        print()
