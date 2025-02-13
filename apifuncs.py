@@ -93,7 +93,7 @@ def insert_idiom_meanings(self, idioms_id):
 
 
 # Function to insert word-idiom connections into the "words_idioms" table
-def insert_word_idiom_connections(self, word_id, idioms_id):
+def insert_word_idiom_connections(word_id, idioms_id):
 
     # Iterate over each idiom ID in the idioms_id list
     for idiom_id in idioms_id:
@@ -113,7 +113,7 @@ def pushWordDB(self):
     idioms_id = insert_idioms(self)
     insert_word_meanings(self, word_id)
     insert_idiom_meanings(self, idioms_id)
-    insert_word_idiom_connections(self, word_id, idioms_id)
+    insert_word_idiom_connections(word_id, idioms_id)
 
 # Placeholder function for fetching a word from the database
 def fetchWordDB():
