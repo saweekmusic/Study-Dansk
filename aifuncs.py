@@ -7,3 +7,9 @@ from openai import OpenAI
 def askWords(openai: OpenAI, DUlevel: str, topic: str, pos: str):
     prompt = f"Provide 5 unique {pos} words in Danish for a {DUlevel} student in the topic of {topic}, progressively increasing in difficulty. Ensure all words are of the correct {pos} and distinct from previous levels, separated by commas. Only return the words in one line, with no additional explanations."
     return
+
+def askExample(openai: OpenAI, phase: str):
+    # TODO: Finish the function
+
+    return
+

@@ -4,22 +4,21 @@ from idioms import Idiom
 from consts import *
 from translatefunc import * 
 from scraper import *
+from apifuncs import *
 
 
 # MARK: Class Word
 class Word:
-    # Attributes
-    word: str = None
-    pronunciation: str = None
-    determiners: str = None
-    gender: str = None
-    bending: list[str] = None
-    meanings: list[Meaning] = None
-    idioms: list[Idiom] = None
 
-
-    # MARK: Init definition
-    def __init__(self, search_word: str = None, determiners: str = None, url: str = None):
+    def __init__(self, search_word: str = None, pos: str = None):
+        # Init of attributes
+        self.word: str = None
+        self.pronunciation: str = None
+        self.pos: str = None
+        self.determiners: str = None
+        self.bending: list[str] = []
+        self.meanings: list[Meaning] = []
+        self.idioms: list[Idiom] = []
 
         # TODO: Database check
 
@@ -34,21 +33,22 @@ class Word:
 
         # Scrape the word
         try:
-            article = findURL(search_word=search_word, determiners=determiners)
+            article = findURL(search_word=search_word, pos=pos)
         except ValueError as e:
             print(e)
             return None
         
 
         self.word = getWord(article)
-        self.determiners = getDeterminers(article, 0)
-        self.gender = getGender(article, self.determiners)
-        self.bending = getBendings(article, self.word)
         self.pronunciation = getPronunciation(article)
+        self.pos = getPOS(article, 0)
+        self.determiners = getDeterminers(article, self.pos)
+        self.bending = getBendings(article, self.word)
         getMeaning(self, article)
         getIdioms(self, article)
 
         # TODO: Add the word to the database
+        pushWordDB(self)
 
 
     # MARK: Add meaning
@@ -77,8 +77,8 @@ def getWord(article: str) -> str:
     return word.text
 
 
-# MARK: Determiners def
-def getDeterminers(article: str, index: int) -> str:
+# MARK: POS def
+def getPOS(article: str, index: int) -> str:
     if index > 1:
         return None
         
@@ -87,13 +87,13 @@ def getDeterminers(article: str, index: int) -> str:
 
 
 # MARK: Gender def
-def getGender(article: str, determiners: str) -> str:
+def getDeterminers(article: str, pos: str) -> str:
     # If it is a noun
-    if determiners == 'substantiv':
-        return 'et' if getDeterminers(article, 1) == 'intetkøn' else 'en'
+    if pos == 'substantiv':
+        return 'et' if getPOS(article, 1) == 'intetkøn' else 'en'
     
     # Else if it is a verb
-    elif determiners == 'verbum':
+    elif pos == 'verbum':
         return 'at'
     
     return None
@@ -162,7 +162,6 @@ def getIdioms(self, article: str):
         if not path:
             break
 
-        print('doing idiom #', i+1)
         # Create Idiom object with the idiom and its translation
         idiom = path.find('span', class_='match').text
         idiom_en = translate(idiom)
@@ -170,7 +169,6 @@ def getIdioms(self, article: str):
 
         for meaning in extract_meanings(expressionsHTML, f'udtryk-{i+1}-betydning'):
             idiom_obj.add_meaning(meaning)
-            print(f'added meaning to idiom: {meaning}')
 
         self.add_idiom(idiom_obj)
 
@@ -198,30 +196,34 @@ def extract_meanings(base_path, id_prefix: str) -> list[Meaning]:
     return meanings
         
         
-test = Word(search_word='lyse', determiners='verb')
-print('Word: ' + test.word)
-print('Pronunciation: ' + test.pronunciation)
-print('Part of Speech: ' + test.determiners)
-print('Gender: ' + test.gender)
-print('Bending: ', end = '')
-print(test.bending)
+test = Word(search_word='lyse', pos='verb')
+# print('Word: ' + test.word)
+# print('Pronunciation: ' + test.pronunciation)
+# print('Part of Speech: ' + test.pos)
+# print('Gender: ' + test.gender)
+# print('Bending: ', end = '')
+# print(test.bending)
 
 
-print('Meanings:')
-for meaning in test.meanings:
-    print('    Definition: ' + meaning.definition)
-    print('    Definition (EN): ' + meaning.definition_en)
-    print('    Example: ' + meaning.example if meaning.example else 'None')
-    print('    Example (EN): ' + meaning.example_en if meaning.example_en else 'None')
-    print()
+# print('Meanings:')
+# for meaning in test.meanings:
+#     print('    Definition: ' + meaning.definition)
+#     print('    Definition (EN): ' + meaning.definition_en)
+#     print('    Example: ' + meaning.example if meaning.example else 'None')
+#     print('    Example (EN): ' + meaning.example_en if meaning.example_en else 'None')
+#     print()
 
-print('Idioms:')
-for idiom in test.idioms:
-    print('    Idiom: ' + idiom.idiom)
-    print('    Idiom (EN): ' + idiom.idiom_en)
-    for meaning in idiom.meanings:
-        print('        Definition: ' + meaning.definition)
-        print('        Definition (EN): ' + meaning.definition_en)
-        print('        Example: ' + meaning.example if meaning.example else 'None')
-        print('        Example (EN): ' + meaning.example_en if meaning.example_en else 'None')
-        print()
+# print('Idioms:')
+# for idiom in test.idioms:
+#     print('    Idiom: ' + idiom.idiom)
+#     print('    Idiom (EN): ' + idiom.idiom_en)
+#     for meaning in idiom.meanings:
+#         print('        Definition: ' + meaning.definition)
+#         print('        Definition (EN): ' + meaning.definition_en)
+#         print('        Example: ' + meaning.example if meaning.example else 'None')
+#         print('        Example (EN): ' + meaning.example_en if meaning.example_en else 'None')
+#         print()
+
+
+
+# {'word': 'lyse', 'pronunciation': '[ˈlyːsə]', 'pos': 'verbum', 'gender': 'at', 'bending': ['lyser', 'lyste', 'lyst']}
