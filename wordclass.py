@@ -1,10 +1,10 @@
 # MARK: Imports
 from meanings import Meaning
 from idioms import Idiom
-from consts import *
-from translatefunc import * 
-from scraper import *
-from apifuncs import *
+from consts import EN_TO_DK, DK_TO_ABBR
+from translatefunc import translate
+from scraper import findURL
+from apifuncs import is_word, fetchWordDB, pushWordDB
 
 
 # MARK: Class Word
@@ -20,15 +20,16 @@ class Word:
         self.meanings: list[Meaning] = []
         self.idioms: list[Idiom] = []
 
-        # TODO: Database check
-
-        # API request of the word from the Database
+        # If nothing is passed
+        if not search_word and not pos:
+            return
         
         # If word exist in the API response
+        if is_word(search_word, EN_TO_DK[pos]):
 
             # Assign values from API to the variables in self
-
-            # Return
+            fetchWordDB(self, search_word, EN_TO_DK[pos])
+            return
 
 
         # Scrape the word
@@ -197,33 +198,29 @@ def extract_meanings(base_path, id_prefix: str) -> list[Meaning]:
         
         
 test = Word(search_word='lyse', pos='verb')
-# print('Word: ' + test.word)
-# print('Pronunciation: ' + test.pronunciation)
-# print('Part of Speech: ' + test.pos)
-# print('Gender: ' + test.gender)
-# print('Bending: ', end = '')
-# print(test.bending)
+print('Word: ' + test.word)
+print('Pronunciation: ' + test.pronunciation)
+print('Part of Speech: ' + test.pos)
+print('Gender: ' + test.determiners)
+print('Bending: ', end = '')
+print(test.bending)
 
 
-# print('Meanings:')
-# for meaning in test.meanings:
-#     print('    Definition: ' + meaning.definition)
-#     print('    Definition (EN): ' + meaning.definition_en)
-#     print('    Example: ' + meaning.example if meaning.example else 'None')
-#     print('    Example (EN): ' + meaning.example_en if meaning.example_en else 'None')
-#     print()
+print('Meanings:')
+for meaning in test.meanings:
+    print('    Definition: ' + meaning.definition)
+    print('    Definition (EN): ' + meaning.definition_en)
+    print('    Example: ' + meaning.example if meaning.example else 'None')
+    print('    Example (EN): ' + meaning.example_en if meaning.example_en else 'None')
+    print()
 
-# print('Idioms:')
-# for idiom in test.idioms:
-#     print('    Idiom: ' + idiom.idiom)
-#     print('    Idiom (EN): ' + idiom.idiom_en)
-#     for meaning in idiom.meanings:
-#         print('        Definition: ' + meaning.definition)
-#         print('        Definition (EN): ' + meaning.definition_en)
-#         print('        Example: ' + meaning.example if meaning.example else 'None')
-#         print('        Example (EN): ' + meaning.example_en if meaning.example_en else 'None')
-#         print()
-
-
-
-# {'word': 'lyse', 'pronunciation': '[ˈlyːsə]', 'pos': 'verbum', 'gender': 'at', 'bending': ['lyser', 'lyste', 'lyst']}
+print('Idioms:')
+for idiom in test.idioms:
+    print('    Idiom: ' + idiom.idiom)
+    print('    Idiom (EN): ' + idiom.idiom_en)
+    for meaning in idiom.meanings:
+        print('        Definition: ' + meaning.definition)
+        print('        Definition (EN): ' + meaning.definition_en)
+        print('        Example: ' + meaning.example if meaning.example else 'None')
+        print('        Example (EN): ' + meaning.example_en if meaning.example_en else 'None')
+        print()

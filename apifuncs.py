@@ -2,6 +2,8 @@
 import os
 from dotenv import load_dotenv
 from supabase import create_client, Client
+from idioms import Idiom
+from meanings import Meaning
 
 # Load environment variables from .env file
 load_dotenv()
@@ -115,6 +117,75 @@ def pushWordDB(self):
     insert_idiom_meanings(self, idioms_id)
     insert_word_idiom_connections(word_id, idioms_id)
 
+
 # Placeholder function for fetching a word from the database
-def fetchWordDB():
-    return
+def fetchWordDB(self, search_word: str, pos: str):
+
+    # Fetch the word data from the database
+    wordT = (supabase.table("words")
+                        .select("*")
+                        .eq("word", search_word)
+                        .eq("pos", pos)
+                        .execute())
+    
+    wordMeaningsT = (supabase.table("word_meanings")
+                        .select("*")
+                        .eq("word_id", wordT.data[0]["id"])
+                        .execute())
+    
+    wordsIdiomsT = (supabase.table("words_idioms")
+                        .select("*")
+                        .eq("word_id", wordT.data[0]["id"])
+                        .execute())
+    
+    idiomsT = (supabase.table("idioms")
+                        .select("*")
+                        .in_("id", [wordsIdiom["idiom_id"] for wordsIdiom in wordsIdiomsT.data])
+                        .execute())
+    
+    idiomMeaningsT = (supabase.table("idiom_meanings")
+                        .select("*")
+                        .in_("idiom_id", [idiom["id"] for idiom in idiomsT.data])
+                        .execute())
+
+    # Assign values from the database to the variables in self
+    self.word = wordT.data[0]["word"]
+    self.pronunciation = wordT.data[0]["pronunciation"]
+    self.pos = wordT.data[0]["pos"]
+    self.determiners = wordT.data[0]["determiners"]
+    self.bending = wordT.data[0]["bending"]
+
+    # Assign meanings and idioms from the database to the variables in self
+    # Iterate over each wordMeaning in wordMeaningsT.data
+    for wordMeaning in wordMeaningsT.data:
+
+        # Append a Meaning object to the self.meanings list
+        self.meanings.append(Meaning(wordMeaning["definition"], wordMeaning["definition_en"], wordMeaning["example"], wordMeaning["example_en"]))
+    
+    # Iterate over each idiom in idiomsT.data
+    for idiom in idiomsT.data:
+
+        # Create an Idiom object
+        idiomObj = Idiom(idiom["idiom"], 
+                         idiom["idiom_en"])
+        
+        data = (supabase.table("idiom_meanings")
+                        .select("*")
+                        .eq("idiom_id", idiom["id"])
+                        .execute())
+
+        # Iterate over each Meaning in idiom
+        for meaning in data.data:
+            idiomObj.add_meaning(Meaning(meaning["definition"], 
+                                        meaning["definition_en"], 
+                                        meaning["example"], 
+                                        meaning["example_en"]))
+        
+        # Append the idiomObj to the self.idioms list
+        self.idioms.append(idiomObj)
+
+
+def is_word(search_word: str, pos: str) -> bool:
+    # Check if the word exists in the "words" table
+    response = supabase.table("words").select("*").eq("word", search_word).eq("pos", pos).execute()
+    return len(response.data) > 0
