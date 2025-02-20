@@ -17,12 +17,22 @@ DK_TO_ABBR = {
     "adverbium": "adv."
 }
 
-PROXIES = []
-for _ in (range(5)):
-    # requests.get('https://api.proxyscrape.com/v2/?request=getproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all')
-    data = requests.get('http://pubproxy.com/api/proxy?https=true&limit=5').json()
-    for proxy in data['data']:
-        PROXIES.append('https://' + proxy['ipPort'])
+# Request proxies
+def getProxis() -> list[str]:
+    proxies = []
+
+    for _ in (range(2)):
+        data = requests.get('http://pubproxy.com/api/proxy?https=true&limit=5').json()
+
+        # For every given proxy
+        for proxy in data['data']:
+            # Append the proxy to the array
+            proxies.append('http://' + proxy['ipPort'])
+
+    return proxies
+
+# An array of available proxies
+PROXIES = getProxis()
 
 
 UA = UserAgent()
