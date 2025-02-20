@@ -16,7 +16,7 @@ class Word:
         self.pronunciation: str = None
         self.pos: str = None
         self.determiner: str = None
-        self.bending: list[str] = []
+        self.bendings: list[str] = []
         self.meanings: list[Meaning] = []
         self.idioms: list[Idiom] = []
 
@@ -44,7 +44,7 @@ class Word:
         self.pronunciation = getPronunciation(article)
         self.pos = getPOS(article, 0)
         self.determiner = getdeterminer(article, self.pos)
-        self.bending = getBendings(article, self.word)
+        self.bendings = getBendings(article, self.word)
         getMeaning(self, article)
         getIdioms(self, article)
 

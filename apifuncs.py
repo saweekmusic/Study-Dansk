@@ -25,7 +25,7 @@ def insert_word(self):
             "pronunciation": self.pronunciation,
             "determiner": self.determiner,
             "pos": self.pos,
-            "bending": self.bending
+            "bendings": self.bendings
         }
     ).execute()
 
@@ -153,7 +153,7 @@ def fetchWordDB(self, search_word: str, pos: str):
     self.pronunciation = wordT.data[0]["pronunciation"]
     self.pos = wordT.data[0]["pos"]
     self.determiner = wordT.data[0]["determiner"]
-    self.bending = wordT.data[0]["bending"]
+    self.bendings = wordT.data[0]["bendings"]
 
     # Assign meanings and idioms from the database to the variables in self
     # Iterate over each wordMeaning in wordMeaningsT.data
