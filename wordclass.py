@@ -1,7 +1,7 @@
 # MARK: Imports
 from meanings import Meaning
 from idioms import Idiom
-from consts import EN_TO_DK, DK_TO_ABBR
+from consts import EN_TO_DK
 from translatefunc import translate
 from scraper import findURL
 from apifuncs import is_word, fetchWordDB, pushWordDB
@@ -15,7 +15,7 @@ class Word:
         self.word: str = None
         self.pronunciation: str = None
         self.pos: str = None
-        self.determiners: str = None
+        self.determiner: str = None
         self.bending: list[str] = []
         self.meanings: list[Meaning] = []
         self.idioms: list[Idiom] = []
@@ -43,7 +43,7 @@ class Word:
         self.word = getWord(article)
         self.pronunciation = getPronunciation(article)
         self.pos = getPOS(article, 0)
-        self.determiners = getDeterminers(article, self.pos)
+        self.determiner = getdeterminer(article, self.pos)
         self.bending = getBendings(article, self.word)
         getMeaning(self, article)
         getIdioms(self, article)
@@ -88,7 +88,7 @@ def getPOS(article: str, index: int) -> str:
 
 
 # MARK: Gender def
-def getDeterminers(article: str, pos: str) -> str:
+def getdeterminer(article: str, pos: str) -> str:
     # If it is a noun
     if pos == 'substantiv':
         return 'et' if getPOS(article, 1) == 'intetkøn' else 'en'
@@ -195,32 +195,3 @@ def extract_meanings(base_path, id_prefix: str) -> list[Meaning]:
         # Append a Meaning object with definition and example
         meanings.append(Meaning(definition, definition_en, example, example_en))
     return meanings
-        
-        
-test = Word(search_word='lyse', pos='verb')
-print('Word: ' + test.word)
-print('Pronunciation: ' + test.pronunciation)
-print('Part of Speech: ' + test.pos)
-print('Gender: ' + test.determiners)
-print('Bending: ', end = '')
-print(test.bending)
-
-
-print('Meanings:')
-for meaning in test.meanings:
-    print('    Definition: ' + meaning.definition)
-    print('    Definition (EN): ' + meaning.definition_en)
-    print('    Example: ' + meaning.example if meaning.example else 'None')
-    print('    Example (EN): ' + meaning.example_en if meaning.example_en else 'None')
-    print()
-
-print('Idioms:')
-for idiom in test.idioms:
-    print('    Idiom: ' + idiom.idiom)
-    print('    Idiom (EN): ' + idiom.idiom_en)
-    for meaning in idiom.meanings:
-        print('        Definition: ' + meaning.definition)
-        print('        Definition (EN): ' + meaning.definition_en)
-        print('        Example: ' + meaning.example if meaning.example else 'None')
-        print('        Example (EN): ' + meaning.example_en if meaning.example_en else 'None')
-        print()
