@@ -72,9 +72,9 @@ class PDF(FPDF):
         # Print the dot line
         bending_width = self.get_string_width(bendings)
         with self.local_context(line_width=0.5):
-            line_length = self.w - self.l_margin - self.r_margin - bending_width - 2
+            line_length = self.w - self.get_x() - self.r_margin - bending_width - 2
             self.set_draw_color(r=179, g=179, b=179)
-            self.line(self.get_x(), self.get_y(), self.get_x(), line_length, self.get_y())
+            self.line(self.get_x(), self.get_y(), self.get_x() + line_length, self.get_y())
 
         # Print the bendings
         self.cell(text=bendings)
