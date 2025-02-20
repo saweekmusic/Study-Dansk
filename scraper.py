@@ -10,11 +10,14 @@ def findURL(search_word: str = None, pos: str = None, url: str = None):
         # Random User-Agent
         header = {'User-Agent': UA.random}
 
+        # Random Proxy
+        proxy = {'https': random.choice(PROXIES)}
+
         # If url is not empty
         if url:
 
             # Use it as a sourse
-            source = requests.get(url, headers=header).text
+            source = requests.get(url, headers=header, proxies=proxy).text
 
             # Returning the html code of the requiered word
             soup = BeautifulSoup(source, 'html.parser')
