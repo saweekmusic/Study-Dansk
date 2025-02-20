@@ -33,13 +33,9 @@ class Word:
 
 
         # Scrape the word
-        try:
-            article = findURL(search_word=search_word, pos=pos)
-        except ValueError as e:
-            print(e)
-            return None
-        
+        article = findURL(search_word=search_word, pos=pos)
 
+        # Apply the data
         self.word = getWord(article)
         self.pronunciation = getPronunciation(article)
         self.pos = getPOS(article, 0)
@@ -48,7 +44,7 @@ class Word:
         getMeaning(self, article)
         getIdioms(self, article)
 
-        # TODO: Add the word to the database
+        # Add the word to the database
         pushWordDB(self)
 
 
@@ -82,8 +78,14 @@ def getWord(article: str) -> str:
 def getPOS(article: str, index: int) -> str:
     if index > 1:
         return None
-        
-    word_info = article.find('span', class_='tekstmedium allow-glossing').text.split(', ')
+    
+    # Find span with class tekstmedium allow-glossing
+    word_info = article.find('span', class_='tekstmedium allow-glossing').text
+    
+    # Break the span
+    word_info = word_info.split(', ')
+
+    # Return requested index
     return word_info[index]
 
 
@@ -133,10 +135,10 @@ def getBendings(article: str, word: str) -> list[str]:
 # MARK: Pronunciation def
 def getPronunciation(article: str) -> str:
 
-    # Find
+    # Find span with class lydskrift
     pronunciation = article.find('span', class_='lydskrift').text
 
-    # Return
+    # Return replacing all the wierd chars
     return pronunciation.replace('\xa0', '')
 
 
@@ -146,6 +148,7 @@ def getMeaning(self, article):
     # Find section with all the definitions and examples
     meanings = article.find('div', id='content-betydninger')
 
+    # Append each meaning
     for meaning in extract_meanings(meanings, 'betydning'):
         self.add_meaning(meaning)
 
@@ -155,6 +158,10 @@ def getIdioms(self, article: str):
 
     # Find section with the idioms
     expressionsHTML = article.find('div', id='content-faste-udtryk')
+
+    # If there is no section with the idioms
+    if not expressionsHTML:
+        return
 
     # For every id="udtryk-{i}" in the section
     for i in range(len(expressionsHTML.find_all('div', id=lambda x: x and x.startswith('udtryk-')))):
@@ -168,18 +175,26 @@ def getIdioms(self, article: str):
         idiom_en = translate(idiom)
         idiom_obj = Idiom(idiom, idiom_en)
 
+        # Append a meaning to the Idiom
         for meaning in extract_meanings(expressionsHTML, f'udtryk-{i+1}-betydning'):
             idiom_obj.add_meaning(meaning)
 
+        # Append idiom to the self
         self.add_idiom(idiom_obj)
 
 
 # MARK: Extract meanings def
 def extract_meanings(base_path, id_prefix: str) -> list[Meaning]:
+    # Empty array to return later
     meanings = []
+
+    # For each div which id starts with id prefix
     for i in range(len(base_path.find_all('div', id=lambda x: x and x.startswith(id_prefix)))):
         
+        # Get inside of the element
         path = base_path.find('div', id=f'{id_prefix}-{i+1}')
+
+        # Break if the element is empty
         if not path:
             break
 
