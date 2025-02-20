@@ -22,7 +22,7 @@ for _ in (range(5)):
     # requests.get('https://api.proxyscrape.com/v2/?request=getproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all')
     data = requests.get('http://pubproxy.com/api/proxy?https=true&limit=5').json()
     for proxy in data['data']:
-        PROXIES.append('https://' + data['ipPort'])
+        PROXIES.append('https://' + proxy['ipPort'])
 
 
 UA = UserAgent()
