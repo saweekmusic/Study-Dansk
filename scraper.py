@@ -4,14 +4,18 @@ import requests
 from consts import *
 from bs4 import BeautifulSoup
 
-def findURL(search_word: str = None, pos: str = None, url: str = None):
-        
+def findURL(search_word: str = None, pos: str = None, url: str = None, proxy = None, header = None):
+        # Wait for 3-6 sec
         time.sleep(random.randint(3, 6))
-        # Random User-Agent
-        header = {'User-Agent': UA.random}
 
-        # Random Proxy
-        proxy = {'https': random.choice(PROXIES)}
+        # Random User-Agent
+        if not header:
+            header = {'User-Agent': UA.random}
+
+        if not proxy:
+            # Random Proxy
+            proxy_random = random.choice(PROXIES)
+            proxy = {'https': proxy_random, 'http': proxy_random}
 
         # If url is not empty
         if url:
@@ -46,6 +50,6 @@ def findURL(search_word: str = None, pos: str = None, url: str = None):
                     # Find the required pos of the word in the searchResultBox
                     for div in divs:
                         if DK_TO_ABBR[EN_TO_DK[pos]] in div.text:
-                            return findURL(url=div.find('a')['href'])
+                            return findURL(url=div.find('a')['href'], proxy=proxy, header=header)
                         
             return article
