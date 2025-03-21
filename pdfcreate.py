@@ -42,6 +42,9 @@ class PDF(FPDF):
             for i in range(0, 10):
                 self.set_x(self.get_x() + gap)
                 self.cell(text=subtitle)
+        
+        self.ln()
+        self.ln(2.0)
 
     # TODO: Finish the print_table function
     def print_table(self, meanings: list[Meaning]):
@@ -53,30 +56,38 @@ class PDF(FPDF):
     # TODO: Finish the print_definition function
     def print_definition(self, word: Word):
         # Set the font
-        with self.local_context(font_family='helvetica-neue', font_size=11, font_style='B'):
-
-            # Print the determiner if it exits
-            if word.determiner:
-                self.write(text=f'{word.determiner} ')
+        with self.local_context():
+            # Set the font
+            self.set_font(family='helvetica-neue', style='B', size=11)
             
             # Print the word
-            self.write(text=f'{word.word}')
+            self.cell(text=f'{word.determiner} {word.word}' if word.determiner else f'{word.word}')
 
         # Print the pronunciation
         self.set_font(family='helvetica-neue', style='', size=11)
-        self.write(text=word.pronunciation)
+        self.cell(text=word.pronunciation)
         self.set_x(self.get_x() + 2)
 
+        # Get the width of the bending
         bendings = '[' + ', '.join(bending for bending in word.bendings) + ']'
-
-        # Print the dot line
         bending_width = self.get_string_width(bendings)
+
+        # Get the height of the text
+        height = self.font_size * 1.2
+
+        # Subtract the line width
+        height = height - 1.5
+
+        # Print the line
         with self.local_context(line_width=0.5):
             line_length = self.w - self.get_x() - self.r_margin - bending_width - 2
+
+            self.set_dash_pattern(dash=0.125, gap=4)
             self.set_draw_color(r=179, g=179, b=179)
-            self.line(self.get_x(), self.get_y(), self.get_x() + line_length, self.get_y())
+            self.line(self.get_x(), self.get_y() + height, self.get_x() + line_length, self.get_y() + height)
 
         # Print the bendings
+        self.set_x(self.get_x() + line_length + 2)
         self.cell(text=bendings)
 
         # Set the gap between the definition and the table of meanings
