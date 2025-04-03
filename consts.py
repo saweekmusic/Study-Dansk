@@ -1,5 +1,6 @@
 from fake_useragent import UserAgent
 import requests
+import fpdf
 
 # Mapping English determiners to full Danish names
 EN_TO_DK = {
@@ -34,5 +35,6 @@ def getProxis() -> list[str]:
 # An array of available proxies
 PROXIES = getProxis()
 
-
 UA = UserAgent()
+
+gray = fpdf.FontFace(color=1)

@@ -1,7 +1,7 @@
 from wordclass import Word
 from meanings import Meaning
 from idioms import Idiom
-from fpdf import FPDF
+from fpdf import FPDF, drawing
 
 class PDF(FPDF):
 
@@ -12,10 +12,18 @@ class PDF(FPDF):
         self.set_right_margin(15)
         self.set_top_margin(15)
 
-        self.add_font('helvetica-neue', style='', fname='Fonts/HelveticaNeue-01.ttf')
-        self.add_font('helvetica-neue', style='B', fname='Fonts/HelveticaNeue-Bold-02.ttf')
-        self.add_font('helvetica-neue', style='I', fname='Fonts/HelveticaNeue-Italic-03.ttf')
-        self.add_font('helvetica-neue', style='BI', fname='Fonts/HelveticaNeue-BoldItalic-04.ttf')
+        self.add_font('helvetica-neue', 
+                      style='', 
+                      fname='Fonts/HelveticaNeue-01.ttf')
+        self.add_font('helvetica-neue', 
+                      style='B', 
+                      fname='Fonts/HelveticaNeue-Bold-02.ttf')
+        self.add_font('helvetica-neue', 
+                      style='I', 
+                      fname='Fonts/HelveticaNeue-Italic-03.ttf')
+        self.add_font('helvetica-neue', 
+                      style='BI', 
+                      fname='Fonts/HelveticaNeue-BoldItalic-04.ttf')
 
 
     def print_title(self, title: str):
@@ -27,12 +35,16 @@ class PDF(FPDF):
         # Print the line under the title
         with self.local_context(line_width=0.5):
             self.set_draw_color(r=179, g=179, b=179)
-            self.line(self.l_margin, self.get_y(), self.w - self.r_margin, self.get_y())
+            self.line(self.l_margin, 
+                      self.get_y(), 
+                      self.w - self.r_margin, 
+                      self.get_y())
         
-        self.ln(5)
+        self.ln(3)
         
 
     def print_subtitle(self, subtitle: str):
+        self.ln(5)
         gap = 1.5
 
         self.set_font(family='helvetica-neue', style='B', size=18)
@@ -46,17 +58,32 @@ class PDF(FPDF):
         self.ln()
         self.ln(2.0)
 
-    # TODO: Finish the print_table function
+
+    # Print_table function
     def print_table(self, meanings: list[Meaning]):
+
         # Set the font
+        self.set_font('helvetica-neue', size=11, style='')
 
         # Follow the screenshot on your phone or on the website
-        pass
+        with self.table(first_row_as_headings=False, 
+                        line_height=1.35 * self.font_size, 
+                        v_align='TOP', 
+                        padding=2, 
+                        markdown=True) as table:
+
+            for meaning in meanings:
+                row = table.row()
+                row.cell(meaning.definition_en)
+                row.cell(f"**{meaning.example}** / {meaning.example_en}")
+
 
     # TODO: Finish the print_definition function
     def print_definition(self, word: Word):
+
         # Set the font
         with self.local_context():
+
             # Set the font
             self.set_font(family='helvetica-neue', style='B', size=11)
             
@@ -84,15 +111,14 @@ class PDF(FPDF):
 
             self.set_dash_pattern(dash=0.125, gap=4)
             self.set_draw_color(r=179, g=179, b=179)
-            self.line(self.get_x(), self.get_y() + height, self.get_x() + line_length, self.get_y() + height)
+            self.line(self.get_x(), 
+                      self.get_y() + height, 
+                      self.get_x() + line_length, 
+                      self.get_y() + height)
 
         # Print the bendings
         self.set_x(self.get_x() + line_length + 2)
         self.cell(text=bendings)
-
-        # Set the gap between the definition and the table of meanings
-
-        pass
 
 
     def print_words(self, words: str, pos: str):
@@ -106,8 +132,12 @@ class PDF(FPDF):
             # Print the definition of the word
             self.print_definition(word=wordInit)
 
+            # Gap
+            self.ln()
+            self.ln(2)
+
             # Print the table of meanings
             self.print_table(meanings=wordInit.meanings)
 
             # Set the gap between the words
-            self.ln(10)
+            self.ln(5)
