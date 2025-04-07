@@ -3,6 +3,7 @@ import time
 import requests
 from consts import *
 from bs4 import BeautifulSoup
+import sys
 
 def findURL(search_word: str = None, pos: str = None, url: str = None, proxy = None, header = None):
         # Wait for 3-6 sec
@@ -38,18 +39,20 @@ def findURL(search_word: str = None, pos: str = None, url: str = None, proxy = N
 
             # If the word doesn't exist
             if not article:
-                raise ValueError('The word does not exist')
+                print('The word does not exist!')
+                sys.exit(1)
 
             # Check If there is a requested pos
-            if pos:
+            if not pos:
+                return article
 
-                # If the current word does not match the requested pos
-                if EN_TO_DK[pos] not in article.find('span', class_='tekstmedium allow-glossing').text:
-                    divs = soup.find('div', class_='searchResultBox').find_all('div')
+            # If the current word does not match the requested pos
+            if not EN_TO_DK[pos] not in article.find('span', class_='tekstmedium allow-glossing').text:
+                return article
+            
+            divs = soup.find('div', class_='searchResultBox').find_all('div')
 
-                    # Find the required pos of the word in the searchResultBox
-                    for div in divs:
-                        if DK_TO_ABBR[EN_TO_DK[pos]] in div.text:
-                            return findURL(url=div.find('a')['href'], proxy=proxy, header=header)
-                        
-            return article
+            # Find the required pos of the word in the searchResultBox
+            for div in divs:
+                if DK_TO_ABBR[EN_TO_DK[pos]] in div.text:
+                    return findURL(url=div.find('a')['href'], proxy=proxy, header=header)

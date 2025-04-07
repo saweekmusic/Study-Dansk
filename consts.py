@@ -1,6 +1,7 @@
 from fake_useragent import UserAgent
 import requests
 import fpdf
+from proxies import getProxis
 
 # Mapping English determiners to full Danish names
 EN_TO_DK = {
@@ -18,23 +19,10 @@ DK_TO_ABBR = {
     "adverbium": "adv."
 }
 
-# Request proxies
-def getProxis() -> list[str]:
-    proxies = []
-
-    for _ in (range(2)):
-        data = requests.get('http://pubproxy.com/api/proxy?https=true&limit=5').json()
-
-        # For every given proxy
-        for proxy in data['data']:
-            # Append the proxy to the array
-            proxies.append('http://' + proxy['ipPort'])
-
-    return proxies
-
-# An array of available proxies
+# For Scraping
 PROXIES = getProxis()
-
 UA = UserAgent()
 
-gray = fpdf.FontFace(color=1)
+# Info that should be globally available
+TOPIC = str
+LEVEL = str
