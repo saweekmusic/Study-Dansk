@@ -1,4 +1,4 @@
-from meanings import Meaning
+from src.Modules.MeaningClass import Meaning
 
 class Idiom:
 

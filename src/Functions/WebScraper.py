@@ -1,7 +1,7 @@
 import random
 import time
 import requests
-from consts import *
+from src.Constants import *
 from bs4 import BeautifulSoup
 import sys
 

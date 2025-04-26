@@ -2,8 +2,8 @@
 import os
 from dotenv import load_dotenv
 from supabase import create_client, Client
-from idioms import Idiom
-from meanings import Meaning
+from src.Modules.IdiomClass import Idiom
+from src.Modules.MeaningClass import Meaning
 
 # Load environment variables from .env file
 load_dotenv()

@@ -1,10 +1,13 @@
-from wordclass import Word
-from meanings import Meaning
-from idioms import Idiom
-from fpdf import FPDF, drawing
+from src.Modules.WordClass import Word, WORDS
+from src.Modules.MeaningClass import Meaning
+from src.Modules.IdiomClass import Idiom
+from fpdf import FPDF
+from src.Constants import TOPIC, LEVEL
+import random
+import re
+from wordsearch import WordSearch, Alphabets
 
 class PDF(FPDF):
-
     def __init__(self):
         super().__init__()
         self.set_auto_page_break(auto=True, margin=15)
@@ -14,16 +17,20 @@ class PDF(FPDF):
 
         self.add_font('helvetica-neue', 
                       style='', 
-                      fname='Fonts/HelveticaNeue-01.ttf')
+                      fname='src/Fonts/HelveticaNeue-01.ttf',
+                      uni=True)
         self.add_font('helvetica-neue', 
                       style='B', 
-                      fname='Fonts/HelveticaNeue-Bold-02.ttf')
+                      fname='src/Fonts/HelveticaNeue-Bold-02.ttf',
+                      uni=True)
         self.add_font('helvetica-neue', 
                       style='I', 
-                      fname='Fonts/HelveticaNeue-Italic-03.ttf')
+                      fname='src/Fonts/HelveticaNeue-Italic-03.ttf',
+                      uni=True)
         self.add_font('helvetica-neue', 
                       style='BI', 
-                      fname='Fonts/HelveticaNeue-BoldItalic-04.ttf')
+                      fname='src/Fonts/HelveticaNeue-BoldItalic-04.ttf',
+                      uni=True)
 
 
     def print_title(self, title: str):
@@ -76,9 +83,10 @@ class PDF(FPDF):
                 row = table.row()
                 row.cell(meaning.definition_en)
                 row.cell(f"**{meaning.example}** / {meaning.example_en}")
+        self.ln(3)
 
 
-    # TODO: Finish the print_definition function
+    # Print definition function
     def print_definition(self, word: Word):
 
         # Set the font
@@ -128,6 +136,7 @@ class PDF(FPDF):
 
             # Create a new word object
             wordInit = Word(search_word=word, pos=pos)
+            WORDS.append(wordInit)
 
             # Print the definition of the word
             self.print_definition(word=wordInit)
@@ -141,3 +150,86 @@ class PDF(FPDF):
 
             # Set the gap between the words
             self.ln(5)
+
+
+    def print_matches(self):
+        words = []
+        defs = []
+
+        for word in WORDS:
+            words.append(word.word)
+            defs.append(word.meanings[0].definition_en)
+
+        # Shuffle the words and definitions
+        random.shuffle(words)
+        random.shuffle(defs)
+
+        # Set the font
+        self.set_font('helvetica-neue', size=11, style='')
+
+        # Create a table
+        with self.table(first_row_as_headings=False, 
+                        line_height=1.35 * self.font_size, 
+                        v_align='M',
+                        gutter_height=3, 
+                        gutter_width=20,
+                        col_widths=(1, 2),
+                        padding=2, 
+                        markdown=True) as table:
+
+            # Add the rows
+            for i, word in enumerate(words):
+                row = table.row()
+                row.cell(word, align='C')
+                row.cell(defs[i], align='C')
+
+        self.ln(8)
+    
+
+    def print_fix_words(self):
+        words = [word.word for word in WORDS]
+        random.shuffle(words)
+
+        #Shuffle letters in the words
+        for i, word in enumerate(words):
+            letters = list(word)
+            random.shuffle(letters)
+            words[i] = ''.join(letters)
+
+        # Set the font
+        self.set_font('helvetica-neue', size=11, style='')
+
+        # Create a table
+        with self.table(first_row_as_headings=False, 
+                        line_height=1.35 * self.font_size, 
+                        v_align='M',
+                        padding=2,
+                        borders_layout='NONE',
+                        markdown=True) as table:
+
+            # Add the rows
+            for i, word in enumerate(words):
+                row = table.row()
+                row.cell(word, align='L')
+                row.cell('', align='L', border='BOTTOM')
+
+
+    def create_puzzle(self):
+        words = [word.word for word in WORDS]
+
+        # Set the font
+        self.set_font('helvetica-neue', size=11, style='')
+
+        # Create a word search puzzle
+        puzzle = WordSearch(words=words, language=Alphabets.DANISH)
+
+        with self.table(first_row_as_headings=False, 
+                        borders_layout='ALL') as table:
+            
+            # Add the rows
+            for row in puzzle.grid:
+                table_row = table.row()
+                for cell in row:
+                    table_row.cell(cell, align='C', v_align='M', border='NONE')
+            
+            

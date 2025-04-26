@@ -1,16 +1,15 @@
 # MARK: Imports
-from meanings import Meaning
-from idioms import Idiom
-from consts import EN_TO_DK
-from translatefunc import translate
-from scraper import findURL
-from apifuncs import is_word, fetchWordDB, pushWordDB
-
+from src.Modules.MeaningClass import Meaning
+from src.Modules.IdiomClass import Idiom
+from src.Constants import EN_TO_DK
+from src.Functions.Translate import translate
+from src.Functions.WebScraper import findURL
+from src.Functions.APIrequests import is_word, fetchWordDB, pushWordDB
 
 # MARK: Class Word
 class Word:
-
     def __init__(self, search_word: str = None, pos: str = None):
+
         # Init of attributes
         self.word: str = None
         self.pronunciation: str = None
@@ -58,9 +57,12 @@ class Word:
         self.idioms.append(idiom)
 
 
+WORDS: list[Word] = []
+
 
 # MARK: Word def
 def getWord(article: str) -> str:
+
     # Find word in the source html
     word = article.find('span', class_='match')
 
@@ -76,6 +78,7 @@ def getWord(article: str) -> str:
 
 # MARK: POS def
 def getPOS(article: str, index: int) -> str:
+
     if index > 1:
         return None
     
@@ -91,6 +94,7 @@ def getPOS(article: str, index: int) -> str:
 
 # MARK: Gender def
 def getdeterminer(article: str, pos: str) -> str:
+
     # If it is a noun
     if pos == 'substantiv':
         return 'et' if getPOS(article, 1) == 'intetkøn' else 'en'
@@ -104,6 +108,7 @@ def getdeterminer(article: str, pos: str) -> str:
 
 # MARK: Bending def
 def getBendings(article: str, word: str) -> list[str]:
+
     # Get benfing section from the site
     bending_sec = article.find('div', id='id-boj')
 
@@ -185,6 +190,7 @@ def getIdioms(self, article: str):
 
 # MARK: Extract meanings def
 def extract_meanings(base_path, id_prefix: str) -> list[Meaning]:
+
     # Empty array to return later
     meanings = []
 
@@ -209,4 +215,5 @@ def extract_meanings(base_path, id_prefix: str) -> list[Meaning]:
 
         # Append a Meaning object with definition and example
         meanings.append(Meaning(definition, definition_en, example, example_en))
+
     return meanings

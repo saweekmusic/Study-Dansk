@@ -1,7 +1,7 @@
 from fake_useragent import UserAgent
 import requests
 import fpdf
-from proxies import getProxis
+from src.Functions.GetProxies import getProxies
 
 # Mapping English determiners to full Danish names
 EN_TO_DK = {
@@ -20,9 +20,11 @@ DK_TO_ABBR = {
 }
 
 # For Scraping
-PROXIES = getProxis()
+PROXIES = getProxies()
 UA = UserAgent()
 
 # Info that should be globally available
 TOPIC = str
 LEVEL = str
+TYPES = ['Nouns', 'Verbs', 'Adjectives']
+
