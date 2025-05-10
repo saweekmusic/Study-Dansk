@@ -1,6 +1,10 @@
 # Personal
 *.pdf
 .DS_Store
+Ouputput/
+
+# VS Code
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
