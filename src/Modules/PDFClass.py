@@ -1,10 +1,7 @@
 from src.Modules.WordClass import Word, WORDS
 from src.Modules.MeaningClass import Meaning
-from src.Modules.IdiomClass import Idiom
 from fpdf import FPDF
-from src.Constants import TOPIC, LEVEL
 import random
-import re
 from wordsearch import WordSearch, Alphabets
 
 class PDF(FPDF):
@@ -36,8 +33,8 @@ class PDF(FPDF):
     def print_title(self, title: str):
         self.set_font(family='helvetica-neue', style='B', size=30)
         self.write(text=title)
-        self.ln()
-        self.ln(2.0)
+
+        self.print_gap(2)
 
         # Print the line under the title
         with self.local_context(line_width=0.5):
@@ -46,12 +43,11 @@ class PDF(FPDF):
                       self.get_y(), 
                       self.w - self.r_margin, 
                       self.get_y())
-        
-        self.ln(3)
+
+        self.ln(4)
         
 
     def print_subtitle(self, subtitle: str):
-        self.ln(5)
         gap = 1.5
 
         self.set_font(family='helvetica-neue', style='B', size=18)
@@ -62,8 +58,7 @@ class PDF(FPDF):
                 self.set_x(self.get_x() + gap)
                 self.cell(text=subtitle)
         
-        self.ln()
-        self.ln(2.0)
+        self.print_gap(2)
 
 
     # Print_table function
@@ -83,7 +78,6 @@ class PDF(FPDF):
                 row = table.row()
                 row.cell(meaning.definition_en)
                 row.cell(f"**{meaning.example}** / {meaning.example_en}")
-        self.ln(3)
 
 
     # Print definition function
@@ -132,7 +126,11 @@ class PDF(FPDF):
     def print_words(self, words: str, pos: str):
 
         # For every word in the array words
-        for word in words:
+        for i, word in enumerate(words):
+
+            # If not the first word, set the gap between the words 5 mm
+            if i != 0:
+                self.ln(5) 
 
             # Create a new word object
             wordInit = Word(search_word=word, pos=pos)
@@ -142,14 +140,12 @@ class PDF(FPDF):
             self.print_definition(word=wordInit)
 
             # Gap
-            self.ln()
-            self.ln(2)
+            self.print_gap(2)
 
             # Print the table of meanings
             self.print_table(meanings=wordInit.meanings)
 
-            # Set the gap between the words
-            self.ln(5)
+        self.section_gap()
 
 
     def print_matches(self):
@@ -183,7 +179,7 @@ class PDF(FPDF):
                 row.cell(word, align='C')
                 row.cell(defs[i], align='C')
 
-        self.ln(8)
+        self.section_gap()
     
 
     def print_fix_words(self):
@@ -213,6 +209,8 @@ class PDF(FPDF):
                 row.cell(word, align='L')
                 row.cell('', align='L', border='BOTTOM')
 
+        self.section_gap()
+
 
     def create_puzzle(self):
         words = [word.word for word in WORDS]
@@ -231,5 +229,15 @@ class PDF(FPDF):
                 table_row = table.row()
                 for cell in row:
                     table_row.cell(cell, align='C', v_align='M', border='NONE')
+
+        self.section_gap()
+
+
+    def print_gap(self, gap: int):
+        self.ln()
+        self.ln(gap)
             
-            
+
+    # Gap between the sections
+    def section_gap(self):
+        self.ln(10)
