@@ -1,3 +1,4 @@
+from src.Modules.TableClass import CustomTable
 from src.Modules.WordClass import Word, WORDS
 from src.Modules.MeaningClass import Meaning
 from fpdf import FPDF
@@ -221,12 +222,20 @@ class PDF(FPDF):
         # Create a word search puzzle
         puzzle = WordSearch(words=words, language=Alphabets.DANISH)
 
-        with self.table(first_row_as_headings=False, 
-                        borders_layout='ALL') as table:
+        table = CustomTable(fpdf=self, first_row_as_headings=False, 
+                        borders_layout='ALL')
             
+        # Add the rows
+        for row in puzzle.grid:
+            table.row(row)
+
+        table_height = int(table.get_total_height())
+
+        with self.table(first_row_as_headings=False, 
+                        borders_layout='ALL', width=table_height) as render_teble:
             # Add the rows
             for row in puzzle.grid:
-                table_row = table.row()
+                table_row = render_teble.row()
                 for cell in row:
                     table_row.cell(cell, align='C', v_align='M', border='NONE')
 
@@ -241,3 +250,18 @@ class PDF(FPDF):
     # Gap between the sections
     def section_gap(self):
         self.ln(10)
+
+    
+    def calculate_table_height(self, table: CustomTable):
+        row_infos = table.get_row_layout_info()
+        if not row_infos:
+            return 0
+
+        total_height = sum(info.height for info in row_infos)
+        total_height += table._gutter_height * (len(row_infos) - 1)
+        total_height += 2 * table._outer_border_margin[1]
+        
+        return total_height
+
+
+    
