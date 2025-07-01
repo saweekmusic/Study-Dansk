@@ -71,9 +71,11 @@
 
 # New Way
 from src.Modules.Body import Body
+from fpdf import FPDF
 
 class Section:
-    def __init__(self, title: str, description: str, body: list[Body]) -> None:
+    def __init__(self, pdf: FPDF, title: str, description: str, body: list[Body]) -> None:
+        self.pdf = pdf
         self.title = title
         self.description = description
         self.body = body
