@@ -107,10 +107,10 @@ class Section:
                 self.pdf.w - self.pdf.r_margin,
                 self.pdf.get_y())
 
-        self.pdf.ln(4)
-
     def render_description(self):
-        pass
+        self.pdf.ln(2)
+        self.pdf.set_font(family='helvetica-neue', style='', size=self.body_size)
+        self.pdf.write(text=self.description)
 
     def render_body(self):
         for body in self.body:
