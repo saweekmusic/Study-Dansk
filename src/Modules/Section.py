@@ -90,7 +90,19 @@ class Section:
         # Additional rendering logic can be added here if needed
 
     def render_title(self):
-        pass
+        self.pdf.set_font(family='helvetica-neue', style='B', size=30)
+        self.pdf.write(text=self.title)
+        self.pdf.ln(2)
+
+        # Line under the title
+        with self.pdf.local_context(line_width=0.5):
+            self.pdf.set_draw_color(r=179, g=179, b=179)
+            self.pdf.line(self.pdf.l_margin, 
+                      self.pdf.get_y(), 
+                      self.pdf.w - self.pdf.r_margin, 
+                      self.pdf.get_y())
+
+        self.pdf.ln(4)
 
     def render_description(self):
         pass
