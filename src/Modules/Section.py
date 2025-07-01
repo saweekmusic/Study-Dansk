@@ -95,6 +95,7 @@ class Section:
     def render_title(self):
         self.pdf.set_font(family='helvetica-neue', style='B', size=self.title_size)
         self.pdf.write(text=self.title)
+        self.pdf.ln()
         self.pdf.ln(2)
 
         # Line under the title
@@ -102,8 +103,8 @@ class Section:
             self.pdf.set_draw_color(r=179, g=179, b=179)
             self.pdf.line(
                 self.pdf.l_margin, 
-                self.pdf.get_y(), 
-                self.pdf.w - self.pdf.r_margin, 
+                self.pdf.get_y(),
+                self.pdf.w - self.pdf.r_margin,
                 self.pdf.get_y())
 
         self.pdf.ln(4)
