@@ -74,7 +74,7 @@ from src.Modules.Body import Body
 from fpdf import FPDF
 
 class Section:
-    def __init__(self, pdf: FPDF, title: str, description: str, body: list[Body]) -> None:
+    def __init__(self, pdf: FPDF, title: str, description: str, body: list[Body] = []) -> None:
         self.pdf = pdf
         self.title = title
         self.description = description
@@ -109,8 +109,10 @@ class Section:
 
     def render_description(self):
         self.pdf.ln(2)
+        self.pdf.set_text_color(200)
         self.pdf.set_font(family='helvetica-neue', style='', size=self.body_size)
         self.pdf.write(text=self.description)
+        self.pdf.set_text_color(255)
 
     def render_body(self):
         for body in self.body:
