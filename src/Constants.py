@@ -30,3 +30,6 @@ POS_TYPES = {           # UI/Display POS types to internal keys
 # Scraping Settings
 PROXIES = getProxies()
 UA = UserAgent()
+
+# PDF Settings
+BODY_SIZE = 11
