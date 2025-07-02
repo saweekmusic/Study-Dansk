@@ -110,7 +110,7 @@ class Section:
     def render_description(self):
         self.pdf.ln(2)
         self.pdf.set_text_color(150)
-        self.pdf.set_font(family='helvetica-neue', style='', size=self.body_size)
+        self.pdf.set_font(family='helvetica-neue', style='I', size=self.body_size)
         self.pdf.write(text=self.description)
         self.pdf.set_text_color(0)
         self.pdf.ln()
