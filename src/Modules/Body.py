@@ -16,7 +16,6 @@ class TableContent(Body):
         self.pdf = pdf
         self.rows = rows
         self.table = table
-        # self.width = pdf.epw
 
         # Setting the table
         for row in rows:
