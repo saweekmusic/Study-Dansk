@@ -90,7 +90,6 @@ class Section:
         self.render_title()
         self.render_description()
         self.render_body()
-        # Additional rendering logic can be added here if needed
 
     def render_title(self):
         self.pdf.set_font(family='helvetica-neue', style='B', size=self.title_size)
