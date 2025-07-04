@@ -47,7 +47,7 @@ class WordContent(Body):
         self.pos = pos
         self.words = askWordsAI(DUlevel, topic, self.pos)
 
-    def subtitle(self, text: str):
+    def subtitle(self):
         horizontal_gap = 1.5
 
         self.pdf.set_font(family='helvetica-neue', style='B', size=18)
@@ -90,7 +90,7 @@ class WordContent(Body):
         self.pdf.cell(text=bendings)
 
     def render(self):
-        self.subtitle(self.pos)
+        self.subtitle()
 
         for current_word in self.words:
             WORDS.append(current_word)
