@@ -1,11 +1,13 @@
-from src.Modules.WordClass import Word
-from src.Functions.Calculate import table_height
 from fpdf.enums import Align
 from fpdf.table import Table
+
 from src.Constants import BODY_SIZE
-from src.Modules.PDFClass import PDF
-from src.Functions.AIrequests import askWordsAI
 from src.Constants import WORDS
+from src.Functions.AIrequests import askWordsAI
+from src.Functions.Calculate import table_height
+from src.Modules.PDFClass import PDF
+from src.Modules.WordClass import Word
+
 
 class Body:
     def render(self):
