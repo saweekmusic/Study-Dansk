@@ -46,6 +46,6 @@ class Section:
         self.pdf.ln()
 
     def render_body(self):
-        self.pdf.ln(4)
         for body in self.body:
+            self.pdf.ln(4) 
             body.render()
