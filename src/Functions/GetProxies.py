@@ -1,3 +1,4 @@
+from typing import Optional
 import requests
 
 
@@ -10,7 +11,7 @@ def freeproxydb() -> list[str]:
         data = requests.get('https://freeproxydb.com/api/proxy/search?https=1').json()
         data = data['data']['data']
     except:
-        print(f"Can't fetch proxies from freeproxydb.com!")
+        print(f'Can\'t fetch proxies from freeproxydb.com!')
         return proxies
 
     # For every given proxy
@@ -23,7 +24,7 @@ def freeproxydb() -> list[str]:
 
 
 # Fetching proxies from 'pubproxy.com'
-def pubproxy() -> list[str]:
+def pubproxy() -> Optional[list[str]]:
     proxies = []
 
     try:
@@ -38,12 +39,12 @@ def pubproxy() -> list[str]:
 
         return proxies
     except:
-        print(f"Can't fetch proxies from pubproxy.com!")
+        print(f'Can\'t fetch proxies from pubproxy.com!')
         return proxies
 
 
 
-def getProxies() -> list[str]:
+def getProxies() -> list[str] | None:
     proxies = pubproxy()
 
     if proxies:

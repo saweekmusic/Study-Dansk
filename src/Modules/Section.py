@@ -1,10 +1,9 @@
-from fpdf import FPDF
-
 from src.Modules.Body import Body
+from src.Modules.PDFClass import PDF
 
 
 class Section:
-    def __init__(self, pdf: FPDF, title: str, description: str, body: list[Body] = []) -> None:
+    def __init__(self, pdf: PDF, title: str, description: str, body: list[Body] = []) -> None:
         self.pdf = pdf
         self.title = title
         self.description = description

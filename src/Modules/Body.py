@@ -1,5 +1,7 @@
+from typing import Optional
 from fpdf.enums import Align
 from fpdf.table import Table
+from fpdf.util import Padding
 
 from src.Constants import BODY_SIZE
 from src.Constants import WORDS
@@ -19,12 +21,19 @@ class TableContent(Body):
         self.pdf = pdf
         self.rows = rows
         self.table = table
+        self.isSquare = square
+
+        self.pdf.set_font(family = 'helvetica-neue', style = '', size = BODY_SIZE)
+        self.table._first_row_as_headings = False # type: ignore
+        self.table._line_height = int(1.35 * pdf.font_size) # type: ignore
+        self.table._padding = Padding.new(2) # type: ignore
+        self.table._markdown = True # type: ignore
 
         # Setting the table
-        for row in rows:
+        for row in self.rows:
             self.table.row(row)
 
-        if square:
+        if self.isSquare:
             self.table._width = table_height(self.pdf, self.table) # type: ignore
             self.table._text_align = Align.coerce('C') # type: ignore
 
@@ -34,9 +43,10 @@ class TableContent(Body):
 
 
 class TextContent(Body):
-    def __init__(self, pdf: PDF, text: str) -> None:
+    def __init__(self, pdf: PDF, words: list[Word], text: str) -> None:
         self.pdf = pdf
         self.text = text
+        self.words = words
 
     def render(self):
         self.pdf.set_font(family = 'helvetica-neue', style = '', size = BODY_SIZE)
@@ -44,9 +54,10 @@ class TextContent(Body):
 
 
 class WordContent(Body):
-    def __init__(self, pdf: PDF, DUlevel: str, topic: str, pos: str) -> None:
+    def __init__(self, pdf: PDF, words: list[Word], DUlevel: str, topic: str, pos: str) -> None:
         self.pdf = pdf
         self.pos = pos
+        self.listOfWord = words
         self.words = askWordsAI(DUlevel, topic, self.pos)
 
     def subtitle(self):
@@ -97,9 +108,8 @@ class WordContent(Body):
         self.subtitle()
 
         for current_word in self.words:
-            WORDS.append(current_word)
-
             word = Word(search_word=current_word, pos=self.pos)
+            self.listOfWord.append(word)
             self.wordInfo(word)
 
             self.pdf.ln()

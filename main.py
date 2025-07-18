@@ -1,25 +1,29 @@
+from src.Modules.Section import Section
 from src.Modules.PDFClass import PDF
-from src.Functions.AIrequests import *
+import src.Config as config
+from src.Modules.WordClass import Word
+
 
 pdf = PDF()
 pdf.add_page()
+WORDS: list[Word] = []
 
-# Section 1
-pdf.print_title("Section 1: Learning New Words")
-pdf.print_subtitle("Verbs")
-pdf.print_words(askWordsAI(None, "DU1.5", "math", "verb"), "verb")
+for section in config.titles.keys():
+    Section(
+        pdf, 
+        config.titles[section], 
+        config.descriptions[section],
+        config.contents[section](pdf, WORDS)).render()
 
-# Section 2
-pdf.print_title("Section 2: Match the Words")
-pdf.print_matches()
 
-# Section 3: Put the letter in the right order
-pdf.print_title("Section 3: Fix the Words")
-pdf.print_fix_words()
 
-# Section 4: Find Words (a puzzle)
-pdf.print_title("Section 4: Find the Words")
-pdf.create_puzzle()
+# # Section 3: Put the letter in the right order
+# pdf.print_title('Section 3: Fix the Words')
+# pdf.print_fix_words()
+
+# # Section 4: Find Words (a puzzle)
+# pdf.print_title('Section 4: Find the Words')
+# pdf.create_puzzle()
 
 # Section 5: Fill from the box
 # Section 6: Idioms
@@ -28,4 +32,4 @@ pdf.create_puzzle()
 
 
 
-pdf.output("Output/output.pdf")
+pdf.output('Output/output.pdf')

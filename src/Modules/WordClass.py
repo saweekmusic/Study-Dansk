@@ -7,29 +7,17 @@ from src.Functions.WebScraper import findURL
 from src.Functions.APIrequests import is_word, fetchWordDB, pushWordDB
 
 # MARK: Class Word
-class Word:
-    def __init__(self, search_word: str = None, pos: str = None):
+from typing import Optional
 
-        # Init of attributes
-        self.word: str = None
-        self.pronunciation: str = None
-        self.pos: str = None
-        self.determiner: str = None
+class Word:
+    def __init__(self, search_word: str, pos: str):
         self.bendings: list[str] = []
         self.meanings: list[Meaning] = []
         self.idioms: list[Idiom] = []
 
-        # If nothing is passed
-        if not search_word and not pos:
-            return
-        
-        # If word exist in the API response
         if is_word(search_word, EN_TO_DK[pos]):
-
-            # Assign values from API to the variables in self
             fetchWordDB(self, search_word, EN_TO_DK[pos])
             return
-
 
         # Scrape the word
         article = findURL(search_word=search_word, pos=pos)
@@ -61,7 +49,7 @@ WORDS: list[Word] = []
 
 
 # MARK: Word def
-def getWord(article: str) -> str:
+def getWord(article) -> str:
 
     # Find word in the source html
     word = article.find('span', class_='match')
@@ -77,10 +65,10 @@ def getWord(article: str) -> str:
 
 
 # MARK: POS def
-def getPOS(article: str, index: int) -> str:
+def getPOS(article, index: int) -> str:
 
     if index > 1:
-        return None
+        return ''
     
     # Find span with class tekstmedium allow-glossing
     word_info = article.find('span', class_='tekstmedium allow-glossing').text
@@ -93,7 +81,7 @@ def getPOS(article: str, index: int) -> str:
 
 
 # MARK: Gender def
-def getdeterminer(article: str, pos: str) -> str:
+def getdeterminer(article, pos: str) -> str:
 
     # If it is a noun
     if pos == 'substantiv':
@@ -103,11 +91,11 @@ def getdeterminer(article: str, pos: str) -> str:
     elif pos == 'verbum':
         return 'at'
     
-    return None
+    return ''
 
 
 # MARK: Bending def
-def getBendings(article: str, word: str) -> list[str]:
+def getBendings(article, word: str) -> list[str]:
 
     # Get benfing section from the site
     bending_sec = article.find('div', id='id-boj')
@@ -138,7 +126,7 @@ def getBendings(article: str, word: str) -> list[str]:
 
 
 # MARK: Pronunciation def
-def getPronunciation(article: str) -> str:
+def getPronunciation(article) -> str:
 
     # Find span with class lydskrift
     pronunciation = article.find('span', class_='lydskrift').text
@@ -159,7 +147,7 @@ def getMeaning(self, article):
 
     
 # MARK: Idioms def
-def getIdioms(self, article: str):
+def getIdioms(self, article):
 
     # Find section with the idioms
     expressionsHTML = article.find('div', id='content-faste-udtryk')
@@ -168,7 +156,7 @@ def getIdioms(self, article: str):
     if not expressionsHTML:
         return
 
-    # For every id="udtryk-{i}" in the section
+    # For every id='udtryk-{i}' in the section
     for i in range(len(expressionsHTML.find_all('div', id=lambda x: x and x.startswith('udtryk-')))):
 
         path = expressionsHTML.find('div', id=f'udtryk-{i+1}')

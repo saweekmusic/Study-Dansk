@@ -8,7 +8,7 @@ def calculate_text_height(pdf: FPDF, text: str, font_size: int, width: float | N
         width = pdf.epw
 
     if font_size <= 0:
-        raise ValueError("Font size must be greater than 0")
+        raise ValueError('Font size must be greater than 0')
     
     original_font_size = int(pdf.font_size)
     pdf.set_font(size = font_size)
@@ -19,10 +19,10 @@ def calculate_text_height(pdf: FPDF, text: str, font_size: int, width: float | N
     # Wrap manually
     words = text.split()
     lines = []
-    current_line = ""
+    current_line = ''
 
     for word in words:
-        test_line = (current_line + " " + word).strip()
+        test_line = (current_line + ' ' + word).strip()
 
         if pdf.get_string_width(test_line) <= width:
             current_line = test_line
@@ -50,7 +50,7 @@ def table_height(pdf: FPDF, table: Table):
             table._width = table._fpdf.epw  # effective page width
 
     # Set outer margins if they aren't set yet
-    if not hasattr(table, "_outer_border_margin") or table._outer_border_margin is None:
+    if not hasattr(table, '_outer_border_margin') or table._outer_border_margin is None:
         if table._outer_border_width:
             table._outer_border_margin = (
                 table._gutter_width + table._outer_border_width / 2,
