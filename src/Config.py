@@ -14,6 +14,7 @@ titles = {
     'Section 1': 'Section 1: Learning Words',
     'Section 2': 'Section 2: Match the Words',
     'Section 3': 'Section 3: Fix the Words',
+    'Section 4': 'Section 4: Word Puzzle',
 }
 
 # ==== SECTION DESCRIPTIONS ====
@@ -33,6 +34,10 @@ descriptions = {
         'In this section, you are given a list of words with their letters jumbled. Your task is to rearrange the letters '
         'to form the correct words. This exercise will help you practice your spelling and reinforce your memory of the words.'
     ),
+    'Section 4': (
+        'In this section, you find a word search puzzle. The words from Section 1 are hidden in the grid. Your task is '
+        'to find and circle all the words. This exercise will help you familiarize yourself with the words and their spelling in a fun and engaging way.'
+    ),
 }
 
 
@@ -40,7 +45,7 @@ descriptions = {
 contents = {
     'Section 1': lambda pdf, words: [
         # WordContent(pdf = pdf, words = words, DUlevel = 'A1', topic = 'Animals', pos = POS_TYPES[pos]) for pos in list(POS_TYPES.keys())
-        WordContent(pdf = pdf, words = words, DUlevel = 'A1', topic = 'Animals', pos = 'verb')
+        WordContent(pdf = pdf, words = words, DUlevel = 'A1', topic = 'Animals', pos = 'verb') # for testing purposes
     ],
     'Section 2': lambda pdf, words: [
         TableContent(pdf = pdf, rows = TCF.wordsDefinitions_into_rows(words), table = Table(
@@ -65,4 +70,15 @@ contents = {
             )
         )
     ],
+    'Section 4': lambda pdf, words: [
+        TableContent(
+            pdf = pdf,
+            rows = TCF.wordPuzzle(words),
+            table = Table(
+                fpdf = pdf,
+                borders_layout = 'ALL'
+            ),
+            square = True
+        )
+    ]
 }

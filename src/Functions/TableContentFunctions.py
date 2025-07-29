@@ -1,6 +1,7 @@
 import random
 from src.Modules.WordClass import Word
 from src.Modules.Cell import TableCell
+from wordsearch import WordSearch, Alphabets
 
 
 def wordsDefinitions_into_rows(words_class: list[Word]) -> list[list[TableCell]]:
@@ -20,3 +21,9 @@ def fixWords_into_rows(words_class: list[Word]):
         random.shuffle(letters)
         words[i] = ''.join(letters)
     return [[TableCell(text = word, align = 'L'), TableCell(align = 'L', border = "BOTTOM")] for word in words]  # Return rows with jumbled words and empty definitions
+
+def wordPuzzle(words_class: list[Word]):
+    words = [word.word for word in words_class]
+    puzzle = WordSearch(words=words, language=Alphabets.DANISH).grid
+
+    return [[TableCell(text = cell, border = 'NONE') for cell in row] for row in puzzle]
