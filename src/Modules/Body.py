@@ -1,14 +1,13 @@
-from typing import Optional
+from fpdf import FPDF
 from fpdf.enums import Align
 from fpdf.table import Table
 from fpdf.util import Padding
-from fpdf.enums import CellBordersLayout
+import math
 
 from src.Modules.Cell import TableCell
 from src.Constants import BODY_SIZE
 from src.Constants import WORDS
 from src.Functions.AIrequests import askWordsAI
-from src.Functions.Calculate import table_height
 from src.Modules.PDFClass import PDF
 from src.Modules.WordClass import Word
 
@@ -55,12 +54,44 @@ class TableContent(Body):
                 )
 
         if self.isSquare:
-            self.table._width = table_height(self.pdf, self.table) # type: ignore
+            self.table._width = self.compute_table_height(self.table) # type: ignore
             self.table._text_align = Align.coerce('C') # type: ignore
 
     def render(self):
         self.pdf.set_font(family = 'helvetica-neue', style = '', size = BODY_SIZE)
         self.table.render()
+
+    def compute_table_height(self, table: Table):
+        # Ensure column count
+        table._cols_count = max(row.cols_count for row in table.rows) if table.rows else 0 # type: ignore
+
+        # Ensure width is set
+        if table._width is None: # type: ignore
+            if table._col_widths and isinstance(table._col_widths, (int, float)): # type: ignore
+                table._width = table._cols_count * table._col_widths # type: ignore
+            else:
+                table._width = table._fpdf.epw  # type: ignore # effective page width
+
+        # Set outer margins if they aren't set yet
+        if not hasattr(table, '_outer_border_margin') or table._outer_border_margin is None: # type: ignore
+            if table._outer_border_width: # type: ignore
+                table._outer_border_margin = ( # type: ignore
+                    table._gutter_width + table._outer_border_width / 2, # type: ignore
+                    table._gutter_height + table._outer_border_width / 2, # type: ignore
+                )
+            else:
+                table._outer_border_margin = (0, 0) # type: ignore
+
+        # Get row info and sum heights
+        row_infos = list(table._compute_rows_info()) # type: ignore
+        if not row_infos:
+            return 0
+
+        total_height = sum(info.height for info in row_infos)
+        total_height += table._gutter_height * (len(row_infos) - 1) # type: ignore
+        total_height += 2 * table._outer_border_margin[1] # type: ignore
+
+        return math.ceil(total_height)
 
 
 class TextContent(Body):
