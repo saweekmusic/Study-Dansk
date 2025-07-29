@@ -30,7 +30,7 @@ class TableContent(Body):
         self.isSquare = square
 
         self.pdf.set_font(family = 'helvetica-neue', style = '', size = BODY_SIZE)
-        self.table._first_row_as_headings = False # type: ignore
+        self.table._num_heading_rows = 0 # type: ignore
         self.table._line_height = int(1.35 * pdf.font_size) # type: ignore
         self.table._padding = Padding.new(2) # type: ignore
         self.table._markdown = True # type: ignore
