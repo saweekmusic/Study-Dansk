@@ -9,8 +9,12 @@ from src.Modules.MeaningClass import Meaning
 load_dotenv()
 
 # Initialize Supabase client
-url: str = os.getenv('SUPABASE_URL')
-key: str = os.getenv('SUPABASE_KEY')
+url: str | None = os.getenv('SUPABASE_URL')
+key: str | None = os.getenv('SUPABASE_KEY')
+
+if url is None or key is None:
+    raise ValueError("Supabase URL and Key must be set in the environment variables.")
+
 supabase: Client = create_client(url, key)
 
 
