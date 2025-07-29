@@ -2,6 +2,7 @@
 *.pdf
 .DS_Store
 Ouputput/
+test.py
 
 # VS Code
 .vscode/
