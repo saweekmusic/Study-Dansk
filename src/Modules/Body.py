@@ -2,7 +2,9 @@ from typing import Optional
 from fpdf.enums import Align
 from fpdf.table import Table
 from fpdf.util import Padding
+from fpdf.enums import CellBordersLayout
 
+from src.Modules.Cell import TableCell
 from src.Constants import BODY_SIZE
 from src.Constants import WORDS
 from src.Functions.AIrequests import askWordsAI
@@ -17,7 +19,12 @@ class Body:
 
 
 class TableContent(Body):
-    def __init__(self, pdf: PDF, rows: list[list[str]], table: Table, square: bool = False) -> None:
+    def __init__(
+            self, 
+            pdf: PDF, 
+            rows: list[list[TableCell]], 
+            table: Table, 
+            square: bool = False) -> None:
         self.pdf = pdf
         self.rows = rows
         self.table = table
@@ -31,7 +38,21 @@ class TableContent(Body):
 
         # Setting the table
         for row in self.rows:
-            self.table.row(row)
+            tablerow = self.table.row()
+            for cell in row:
+                tablerow.cell(
+                    text = cell.text,
+                    align = cell.align,
+                    v_align = cell.v_align,
+                    style = cell.style,
+                    img = cell.img,
+                    img_fill_width = cell.img_fill_width,
+                    colspan = cell.colspan,
+                    rowspan = cell.rowspan,
+                    link = cell.link,
+                    padding = cell.padding,
+                    border = cell.border
+                )
 
         if self.isSquare:
             self.table._width = table_height(self.pdf, self.table) # type: ignore
@@ -116,6 +137,6 @@ class WordContent(Body):
             self.pdf.ln(2)
             TableContent(
                 pdf = self.pdf, 
-                rows = [ [ meaning.definition_en, f"**{meaning.example}** / {meaning.example_en}" ] for meaning in word.meanings ],
+                rows = [ [ TableCell(text = meaning.definition_en), TableCell(f"**{meaning.example}** / {meaning.example_en}") ] for meaning in word.meanings ],
                 table = Table(self.pdf, line_height = int(1.35 * self.pdf.font_size), v_align = 'TOP', padding = 2, markdown = True)
             ).render()
