@@ -3,17 +3,23 @@ from src.Modules.PDFClass import PDF
 import src.Config as config
 from src.Modules.WordClass import Word
 
-
 pdf = PDF()
 pdf.add_page()
 WORDS: list[Word] = []
+DUlevel = "DU3.1"
+topic = "Animals"
 
 for section in config.titles.keys():
+    if section == 'Section 1':
+        content = config.contents[section](pdf, WORDS, DUlevel, topic)
+    else:
+        content = config.contents[section](pdf, WORDS)
+
     Section(
         pdf, 
         config.titles[section], 
         config.descriptions[section],
-        config.contents[section](pdf, WORDS)).render()
+        content).render()
 
 # Section 5: Fill from the box
 # Section 6: Idioms

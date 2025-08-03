@@ -1,0 +1,52 @@
+{
+  "output_format": "word1, word2, word3, word4, word5",
+  "context": {
+    "du_structure": {
+      "DU1": {
+        "description": "For learners with little or no schooling and limited literacy; not familiar with the Latin alphabet; slow pace and basic survival vocabulary.",
+        "modules": {
+          "1": "Absolute beginner (Pre-A1 / A1-)",
+          "2": "Can understand/respond to basic questions (A1)",
+          "3": "Can write simple sentences (A1+)",
+          "4": "Can describe routines (A2)",
+          "5": "Ready for PD1 exam (A2+)"
+        }
+      },
+      "DU2": {
+        "description": "For learners with 8-10 years of schooling; familiar with Latin letters and basic education; moderate pace.",
+        "modules": {
+          "1": "Beginner with prior schooling (A1)",
+          "2": "Can follow everyday conversations (A1+)",
+          "3": "Can write short messages and describe events (A2)",
+          "4": "Can talk about experiences and opinions (A2+)",
+          "5": "Can handle work/social situations in Danish (B1)",
+          "6": "Ready for PD2 exam (B1+)"
+        }
+      },
+      "DU3": {
+        "description": "For well-educated learners with strong grammar and academic background; understand English well; faster pace; may aim for university.",
+        "modules": {
+          "1": "Beginner but literate and educated (A1)",
+          "2": "Can handle basic written and spoken tasks (A2)",
+          "3": "Can describe events and opinions (A2+)",
+          "4": "Can discuss abstract themes, write essays (B1+)",
+          "5": "Ready for PD3 exam (B2)",
+          "6": "Ready for Studieprøven (C1)"
+        }
+      }
+    },
+    "word_selection_criteria": [
+      "Appropriate to both DU level and module",
+      "Relevant to the specified topic",
+      "Unique and not repeated from earlier modules unless foundational",
+      "Real Danish words in use today",
+      "No slang or outdated terms unless culturally essential"
+    ],
+    "output_rules": {
+      "format": "lowercase",
+      "separator": "comma",
+      "count": 5,
+      "no_additional_output": true
+    }
+  }
+}

@@ -1,8 +1,10 @@
 from google import genai
 import os
 from dotenv import load_dotenv
+import json
 
 load_dotenv()
+model = "gemini-2.5-flash-lite-preview-06-17"
 
 # DUlevel = requested Danskuddannelse level
 # topic = subject for word search
@@ -15,14 +17,14 @@ def AIClientInit() -> genai.Client:
     return genai.Client(api_key=api_key)
 
 def askWordsAI(DUlevel: str, topic: str, pos: str) -> list[str]:
-    # return ['løse', 'tælle', 'addere', 'dividere', 'subtrahere']
-
     client = AIClientInit()
 
-    prompt = f'Provide 5 unique {pos} words in Danish for a {DUlevel} student in the topic of {topic}, progressively increasing in difficulty. Ensure all words are of the correct {pos} and distinct from previous levels, separated by commas. Only return the words in one line, with no additional explanations.'
-    response = client.models.generate_content(
-        model="gemini-2.5-flash-lite-preview-06-17", contents=prompt
-    ).text
+    # Import the AI request prompt
+    with open('src/AIPromts/WordsRequest.json', 'r') as file:
+        prompt_data = json.load(file)
+
+    prompt = f'Please provide a list of five unique {pos} in lowercase, separated by commas only — no other output, no punctuation at the end. The words must match {DUlevel} level and module, and be related to the topic/theme "{topic}".\n{json.dumps(prompt_data, indent=2)}'
+    response = client.models.generate_content(model = model, contents=prompt).text
 
     if response:
         return response.split(', ')
@@ -31,9 +33,9 @@ def askWordsAI(DUlevel: str, topic: str, pos: str) -> list[str]:
 def askExampleAI(phrase: str, meaning: str) -> str:
     # TODO: Finish the function
     client = AIClientInit()
-    prompt = f'Provide an example sentence in danish for the word \'{phrase}\' in the meaning of \'{meaning}\'. Only return the sentence only, in one line, with no additional explanations.'
+    prompt = f'Provide an example sentence in danish for the word "{phrase}" in the meaning of "{meaning}". Only return the sentence only, in one line, with no additional explanations.'
     response = client.models.generate_content(
-        model="gemini-2.5-flash-lite-preview-06-17", contents=prompt
+        model = model, contents=prompt
     ).text
 
     if response:

@@ -43,9 +43,9 @@ descriptions = {
 
 # ==== SECTION CONTENTS ====
 contents = {
-    'Section 1': lambda pdf, words: [
+    'Section 1': lambda pdf, words, DUlevel, topic: [
         # WordContent(pdf = pdf, words = words, DUlevel = 'A1', topic = 'Animals', pos = POS_TYPES[pos]) for pos in list(POS_TYPES.keys())
-        WordContent(pdf = pdf, words = words, DUlevel = 'A1', topic = 'Animals', pos = 'verb') # for testing purposes
+        WordContent(pdf = pdf, words = words, DUlevel = DUlevel, topic = topic, pos = 'verb') # for testing purposes
     ],
     'Section 2': lambda pdf, words: [
         TableContent(pdf = pdf, rows = TCF.wordsDefinitions_into_rows(words), table = Table(
